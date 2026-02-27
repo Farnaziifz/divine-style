@@ -1,19 +1,20 @@
 import React from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import { Product } from '../types';
 import { PRODUCTS } from '../constants';
 import { useLanguage } from '../contexts/LanguageContext';
+import { useCart } from '../contexts/CartContext';
 import { ArrowLeft, ArrowRight, ShoppingBag } from 'lucide-react';
 
-interface StyleInspirationPageProps {
-  product: Product;
-  onBack: () => void;
-  onAddToCart: (product: Product) => void;
-  onProductClick: (product: Product) => void;
-}
-
-export const StyleInspirationPage: React.FC<StyleInspirationPageProps> = ({ product, onBack, onAddToCart, onProductClick }) => {
+export const StyleInspiration: React.FC = () => {
+  const { id } = useParams<{ id: string }>();
+  const product = PRODUCTS.find(p => p.id === id);
+  const navigate = useNavigate();
+  const { addToCart } = useCart();
   const { t, direction } = useLanguage();
   const BackArrow = direction === 'rtl' ? ArrowRight : ArrowLeft;
+
+  if (!product) return <div>Product not found</div>;
 
   // Mock Styling Looks (In a real app, this would come from the product object)
   const looks = [
@@ -45,7 +46,7 @@ export const StyleInspirationPage: React.FC<StyleInspirationPageProps> = ({ prod
       
       {/* Header */}
       <div className="fixed top-0 w-full z-40 px-6 py-6 flex items-center justify-between mix-blend-difference text-[#E8E0D9]">
-          <button onClick={onBack} className="flex items-center gap-2 hover:opacity-70 transition-opacity">
+          <button onClick={() => navigate(-1)} className="flex items-center gap-2 hover:opacity-70 transition-opacity">
               <BackArrow size={24} /> <span className="uppercase tracking-widest text-sm">{t('style.back')}</span>
           </button>
           <h1 className="font-serif text-xl hidden md:block">{t('style.title')}</h1>
@@ -108,7 +109,7 @@ export const StyleInspirationPage: React.FC<StyleInspirationPageProps> = ({ prod
               <div className="relative z-10">
                   <h3 className="font-serif text-4xl md:text-6xl mb-8">Make it Yours</h3>
                   <button 
-                    onClick={() => onAddToCart(product)}
+                    onClick={() => addToCart(product)}
                     className="bg-[#E8E0D9] text-zafting-text px-10 py-4 rounded-full text-sm uppercase tracking-widest hover:scale-105 transition-transform font-bold"
                   >
                       {t('shop.btn.buy')} - ${product.price}
@@ -138,7 +139,7 @@ export const StyleInspirationPage: React.FC<StyleInspirationPageProps> = ({ prod
                         <div 
                             key={p.id} 
                             className="group relative w-[220px] flex flex-col items-center cursor-pointer pt-6"
-                            onClick={() => onProductClick(p)}
+                            onClick={() => navigate(`/product/${p.id}`)}
                         >
                             {/* Hanger Hook Visual */}
                             <div className="absolute top-[-10px] w-4 h-8 border-t-4 border-l-4 border-r-4 border-gray-400 rounded-t-full z-10"></div>

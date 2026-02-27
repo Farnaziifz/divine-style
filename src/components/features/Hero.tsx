@@ -1,7 +1,7 @@
 import React from 'react';
 import { ArrowRight, ArrowLeft } from 'lucide-react';
-import { Product } from '../types';
-import { useLanguage } from '../contexts/LanguageContext';
+import { Product } from '../../types';
+import { useLanguage } from '../../contexts/LanguageContext';
 
 interface HeroProps {
   featuredProduct: Product;

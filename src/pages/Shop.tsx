@@ -1,14 +1,12 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '../contexts/LanguageContext';
 import { ArrowRight, ArrowLeft, ArrowDownLeft, ShoppingBag, ArrowUpRight } from 'lucide-react';
 import { PRODUCTS } from '../constants';
 
-interface ShopPageProps {
-  onCategoryClick: (categoryId: string) => void;
-}
-
-export const ShopPage: React.FC<ShopPageProps> = ({ onCategoryClick }) => {
+export const Shop: React.FC = () => {
   const { t, direction } = useLanguage();
+  const navigate = useNavigate();
   const ArrowIcon = direction === 'rtl' ? ArrowLeft : ArrowRight;
   
   // Reuse existing products for imagery
@@ -285,7 +283,7 @@ export const ShopPage: React.FC<ShopPageProps> = ({ onCategoryClick }) => {
                  <div 
                     key={cat.id} 
                     className={`group relative h-[300px] md:h-[400px] rounded-[2rem] overflow-hidden cursor-pointer ${idx % 2 === 0 ? 'mt-0' : 'md:mt-8'}`}
-                    onClick={() => onCategoryClick(cat.id)}
+                    onClick={() => navigate(`/category/${cat.id}`)}
                  >
                      {/* Image with zoom effect */}
                      <img 

@@ -232,7 +232,7 @@ const translations: Record<Language, Record<string, string>> = {
 };
 
 export const LanguageProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [language, setLanguage] = useState<Language>('en');
+  const [language, setLanguage] = useState<Language>('fa');
   const direction = language === 'fa' ? 'rtl' : 'ltr';
 
   useEffect(() => {

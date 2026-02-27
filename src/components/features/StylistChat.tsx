@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { X, Send, Sparkles } from 'lucide-react';
-import { ChatMessage } from '../types';
-import { sendMessageToStylist } from '../services/geminiService';
-import { useLanguage } from '../contexts/LanguageContext';
+import { ChatMessage } from '../../types';
+import { sendMessageToStylist } from '../../services/geminiService';
+import { useLanguage } from '../../contexts/LanguageContext';
 
 export const StylistChat: React.FC = () => {
   const { t } = useLanguage();

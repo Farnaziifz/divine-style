@@ -1,14 +1,13 @@
 import React, { useState } from 'react';
 import { ArrowLeft, ArrowRight, X } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '../contexts/LanguageContext';
+import { useAuth } from '../contexts/AuthContext';
 
-interface AuthPageProps {
-  onLoginSuccess: () => void;
-  onClose: () => void;
-}
-
-export const AuthPage: React.FC<AuthPageProps> = ({ onLoginSuccess, onClose }) => {
+export const Auth: React.FC = () => {
   const { t, direction } = useLanguage();
+  const { login } = useAuth();
+  const navigate = useNavigate();
   const [step, setStep] = useState<'phone' | 'otp'>('phone');
   const [phoneNumber, setPhoneNumber] = useState('');
   const [otp, setOtp] = useState(['', '', '', '']);
@@ -49,7 +48,8 @@ export const AuthPage: React.FC<AuthPageProps> = ({ onLoginSuccess, onClose }) =
     if (otpValue.length === 4) {
       // Mock Verification
       setTimeout(() => {
-        onLoginSuccess();
+        login();
+        navigate('/profile');
       }, 800);
     }
   };
@@ -57,13 +57,13 @@ export const AuthPage: React.FC<AuthPageProps> = ({ onLoginSuccess, onClose }) =
   const BackArrow = direction === 'rtl' ? ArrowRight : ArrowLeft;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-md">
+    <div className="min-h-screen pt-24 pb-12 flex items-center justify-center p-4">
       {/* Main Container */}
-      <div className="w-full max-w-5xl h-[85vh] bg-[#E8E0D9] rounded-[3rem] shadow-2xl flex overflow-hidden relative animate-fade-in">
+      <div className="w-full max-w-5xl h-[85vh] bg-[#E8E0D9] rounded-[3rem] shadow-2xl flex overflow-hidden relative animate-fade-in border border-white/40">
         
         {/* Close Button */}
         <button 
-          onClick={onClose}
+          onClick={() => navigate('/')}
           className="absolute top-8 end-8 z-20 w-10 h-10 rounded-full border border-zafting-text/20 flex items-center justify-center text-zafting-text hover:bg-zafting-text hover:text-white transition-colors"
         >
           <X size={20} />

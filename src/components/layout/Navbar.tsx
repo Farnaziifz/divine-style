@@ -1,15 +1,15 @@
 import React, { useState } from 'react';
 import { ShoppingBag, User, Menu, Globe, X, ArrowRight, ArrowLeft } from 'lucide-react';
-import { useLanguage } from '../contexts/LanguageContext';
+import { Link, useNavigate } from 'react-router-dom';
+import { useLanguage } from '../../contexts/LanguageContext';
+import { useCart } from '../../contexts/CartContext';
+import { useAuth } from '../../contexts/AuthContext';
 
-interface NavbarProps {
-  cartCount: number;
-  onOpenCart: () => void;
-  onNavigate: (view: 'home' | 'shop' | 'auth' | 'profile') => void;
-}
-
-export const Navbar: React.FC<NavbarProps> = ({ cartCount, onOpenCart, onNavigate }) => {
+export const Navbar: React.FC = () => {
   const { language, setLanguage, t, direction } = useLanguage();
+  const { cartCount, setIsCartOpen } = useCart();
+  const { isAuthenticated } = useAuth();
+  const navigate = useNavigate();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const toggleLanguage = () => {
@@ -18,29 +18,36 @@ export const Navbar: React.FC<NavbarProps> = ({ cartCount, onOpenCart, onNavigat
 
   const handleNavClick = (key: string) => {
     if (key === 'nav.menu.shop') {
-        onNavigate('shop');
+        navigate('/shop');
     } else if (key === 'nav.menu.collections') {
-        onNavigate('home');
+        navigate('/');
     }
     setIsMenuOpen(false);
   };
 
+  const handleAuthClick = () => {
+    if (isAuthenticated) {
+      navigate('/profile');
+    } else {
+      navigate('/auth');
+    }
+  };
+
   const menuItems = [
-    { key: 'nav.menu.shop', href: '#' },
-    { key: 'nav.menu.collections', href: '#' },
+    { key: 'nav.menu.shop', href: '/shop' },
+    { key: 'nav.menu.collections', href: '/' },
+    // These could be actual routes later
     { key: 'nav.menu.blog', href: '#' },
     { key: 'nav.menu.about', href: '#' },
     { key: 'nav.menu.contact', href: '#' },
   ];
 
-  const ArrowIcon = direction === 'rtl' ? ArrowLeft : ArrowRight;
-
   return (
     <>
       <nav className="fixed top-0 start-0 w-full z-40 px-6 py-6 flex justify-between items-center mix-blend-multiply pointer-events-none">
-        <button onClick={() => onNavigate('home')} className="pointer-events-auto text-xl tracking-widest font-sans font-medium text-zafting-text uppercase z-50">
+        <Link to="/" className="pointer-events-auto text-xl tracking-widest font-sans font-medium text-zafting-text uppercase z-50">
           {t('nav.title')}
-        </button>
+        </Link>
         
         <div className="flex items-center gap-6 md:gap-8 pointer-events-auto">
           <button 
@@ -52,13 +59,13 @@ export const Navbar: React.FC<NavbarProps> = ({ cartCount, onOpenCart, onNavigat
           </button>
 
           <button 
-            onClick={() => onNavigate('auth')} // Logic handled in App.tsx (redirects to profile if logged in)
+            onClick={handleAuthClick}
             className="text-zafting-text hover:opacity-70 transition-opacity"
           >
             <User size={20} strokeWidth={1.5} />
           </button>
           <button 
-            onClick={onOpenCart}
+            onClick={() => setIsCartOpen(true)}
             className="text-zafting-text hover:opacity-70 transition-opacity relative"
           >
             <ShoppingBag size={20} strokeWidth={1.5} />
@@ -99,12 +106,9 @@ export const Navbar: React.FC<NavbarProps> = ({ cartCount, onOpenCart, onNavigat
                     onClick={() => handleNavClick(item.key)}
                     className="font-serif text-4xl md:text-6xl text-zafting-text hover:text-zafting-accent transition-colors flex items-center gap-4 group"
                 >
-                    <span className="opacity-0 -translate-x-4 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300 rtl:translate-x-4 rtl:group-hover:translate-x-0">
-                        <ArrowIcon size={24} />
-                    </span>
                     {t(item.key)}
-                    <span className="opacity-0 translate-x-4 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300 rtl:-translate-x-4 rtl:group-hover:translate-x-0">
-                        <ArrowIcon size={24} />
+                    <span className="opacity-0 group-hover:opacity-100 transition-opacity transform group-hover:translate-x-2 rtl:group-hover:-translate-x-2">
+                       {direction === 'rtl' ? <ArrowLeft size={32} /> : <ArrowRight size={32} />}
                     </span>
                 </button>
             ))}

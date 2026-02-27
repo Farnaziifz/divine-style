@@ -1,25 +1,31 @@
 import React from 'react';
-import { Product } from '../types';
+import { Product } from '../../types';
 import { Plus } from 'lucide-react';
-import { useLanguage } from '../contexts/LanguageContext';
+import { useLanguage } from '../../contexts/LanguageContext';
 
 interface ProductGridProps {
   products: Product[];
   onAddToCart: (product: Product) => void;
+  onProductClick?: (product: Product) => void;
+  title?: string;
 }
 
-export const ProductGrid: React.FC<ProductGridProps> = ({ products, onAddToCart }) => {
+export const ProductGrid: React.FC<ProductGridProps> = ({ products, onAddToCart, onProductClick, title }) => {
   const { t } = useLanguage();
 
   return (
     <section className="py-20 px-6 max-w-7xl mx-auto">
       <h2 className="font-serif text-4xl md:text-5xl text-zafting-text mb-12 text-center">
-        {t('collection.title')}
+        {title || t('collection.title')}
       </h2>
       
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
         {products.map((product) => (
-          <div key={product.id} className="group cursor-pointer">
+          <div 
+            key={product.id} 
+            className="group cursor-pointer"
+            onClick={() => onProductClick && onProductClick(product)}
+          >
             <div className="relative aspect-[3/4] overflow-hidden rounded-t-[50px] mb-4">
               <img
                 src={product.image}

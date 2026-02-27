@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Star, User, CheckCircle, PenLine } from 'lucide-react';
-import { useLanguage } from '../contexts/LanguageContext';
-import { Review } from '../types';
+import { useLanguage } from '../../contexts/LanguageContext';
+import { Review } from '../../types';
 
 interface ReviewsSectionProps {
   initialReviews: Review[];

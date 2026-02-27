@@ -1,25 +1,27 @@
 import React, { useState } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import { Product } from '../types';
+import { PRODUCTS } from '../constants';
 import { ArrowLeft, ArrowRight, Star, ShoppingBag, Ruler, Shirt, Layers, Play, X, Rotate3D, Sparkles } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
-import { ReviewsSection } from './ReviewsSection';
+import { useCart } from '../contexts/CartContext';
+import { ReviewsSection } from '../components/features/ReviewsSection';
 
-interface ProductDetailPageProps {
-  product: Product;
-  onAddToCart: (product: Product) => void;
-  onBack: () => void;
-  onOpenStyling?: (product: Product) => void;
-}
-
-export const ProductDetailPage: React.FC<ProductDetailPageProps> = ({ product, onAddToCart, onBack, onOpenStyling }) => {
+export const ProductDetail: React.FC = () => {
+  const { id } = useParams<{ id: string }>();
+  const product = PRODUCTS.find(p => p.id === id);
+  const navigate = useNavigate();
+  const { addToCart } = useCart();
   const { t, direction } = useLanguage();
   const BackArrow = direction === 'rtl' ? ArrowRight : ArrowLeft;
   const ForwardArrow = direction === 'rtl' ? ArrowLeft : ArrowRight;
   
-  const [selectedSize, setSelectedSize] = useState<string>(product.sizes?.[2]?.label || 'M'); // Default to M
+  const [selectedSize, setSelectedSize] = useState<string>(product?.sizes?.[2]?.label || 'M'); // Default to M
   const [isGalleryOpen, setIsGalleryOpen] = useState(false);
   const [isVideoOpen, setIsVideoOpen] = useState(false);
   const [galleryRotateY, setGalleryRotateY] = useState(0);
+
+  if (!product) return <div>Product not found</div>;
 
   const currentSizeData = product.sizes?.find(s => s.label === selectedSize);
   
@@ -130,7 +132,7 @@ export const ProductDetailPage: React.FC<ProductDetailPageProps> = ({ product, o
         {/* Left: Immersive Image & Interactive Triggers */}
         <div className="lg:w-1/2 h-[50vh] lg:h-screen relative overflow-hidden group sticky top-0">
            <button 
-            onClick={onBack}
+            onClick={() => navigate(-1)}
             className="absolute top-6 start-6 z-20 w-12 h-12 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center text-white hover:bg-white hover:text-zafting-text transition-colors shadow-lg"
            >
              <BackArrow size={24} />
@@ -283,7 +285,7 @@ export const ProductDetailPage: React.FC<ProductDetailPageProps> = ({ product, o
               {/* Strong CTA for Styling Inspiration (NEW) */}
               <div className="mb-12">
                   <button 
-                    onClick={() => onOpenStyling && onOpenStyling(product)}
+                    onClick={() => navigate(`/styling/${product.id}`)}
                     className="w-full group relative overflow-hidden rounded-2xl bg-[#2A2A2A] text-[#E8E0D9] p-6 flex items-center justify-between shadow-xl hover:shadow-2xl transition-all duration-300"
                   >
                       {/* Animated Background Effect */}
@@ -312,7 +314,7 @@ export const ProductDetailPage: React.FC<ProductDetailPageProps> = ({ product, o
               {/* Actions */}
               <div className="flex gap-4 sticky bottom-0 bg-[#E8E0D9]/90 backdrop-blur-md py-4 -mx-4 px-4 lg:static lg:bg-transparent lg:p-0 z-10">
                  <button 
-                    onClick={() => onAddToCart({ ...product })}
+                    onClick={() => addToCart({ ...product })}
                     className="flex-1 bg-zafting-text text-[#E8E0D9] py-5 rounded-full uppercase tracking-widest text-sm hover:scale-105 transition-transform flex items-center justify-center gap-3 shadow-xl"
                  >
                     {t('shop.btn.buy')} <ShoppingBag size={18} />

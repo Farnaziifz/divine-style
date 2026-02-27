@@ -1,17 +1,15 @@
 import React, { useState } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import { Product } from '../types';
 import { PRODUCTS } from '../constants';
 import { useLanguage } from '../contexts/LanguageContext';
+import { useCart } from '../contexts/CartContext';
 import { Filter, SlidersHorizontal, ArrowRight, ArrowLeft, Percent, ShoppingBag } from 'lucide-react';
 
-interface CategoryPageProps {
-  categoryId: string;
-  onAddToCart: (product: Product) => void;
-  onBack: () => void;
-  onProductClick: (product: Product) => void;
-}
-
-export const CategoryPage: React.FC<CategoryPageProps> = ({ categoryId, onAddToCart, onBack, onProductClick }) => {
+export const Category: React.FC = () => {
+  const { id: categoryId } = useParams<{ id: string }>();
+  const navigate = useNavigate();
+  const { addToCart } = useCart();
   const { t, direction } = useLanguage();
   const [currentPage, setCurrentPage] = useState(1);
   // Animation State
@@ -52,10 +50,10 @@ export const CategoryPage: React.FC<CategoryPageProps> = ({ categoryId, onAddToC
           // 2. Wait for animation to finish then navigate
           // Match duration with CSS transition duration
           setTimeout(() => {
-              onProductClick(product);
+              navigate(`/product/${product.id}`);
           }, 800);
       } else {
-          onProductClick(product);
+          navigate(`/product/${product.id}`);
       }
   };
 
@@ -118,7 +116,7 @@ export const CategoryPage: React.FC<CategoryPageProps> = ({ categoryId, onAddToC
       {/* 1. Header & Filters */}
       <header className="px-6 md:px-12 mb-12 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
         <div>
-          <button onClick={onBack} className="flex items-center gap-2 text-xs uppercase tracking-widest opacity-60 hover:opacity-100 transition-opacity mb-2">
+          <button onClick={() => navigate('/shop')} className="flex items-center gap-2 text-xs uppercase tracking-widest opacity-60 hover:opacity-100 transition-opacity mb-2">
             <BackArrowIcon size={14} /> {t('shop.cat.title')}
           </button>
           <h1 className="font-serif text-5xl md:text-7xl text-zafting-text">
@@ -156,7 +154,7 @@ export const CategoryPage: React.FC<CategoryPageProps> = ({ categoryId, onAddToC
                   <p className="opacity-70 text-lg leading-relaxed max-w-md mb-6">{featuredProduct.description}</p>
                   <p className="text-2xl mb-6">${featuredProduct.price}</p>
                   <button 
-                    onClick={() => onAddToCart(featuredProduct)}
+                    onClick={() => addToCart(featuredProduct)}
                     className="bg-zafting-text text-[#E8E0D9] px-8 py-4 rounded-full uppercase tracking-widest hover:scale-105 transition-transform"
                   >
                     {t('shop.btn.buy')}
@@ -217,7 +215,7 @@ export const CategoryPage: React.FC<CategoryPageProps> = ({ categoryId, onAddToC
                                  <button 
                                     onClick={(e) => {
                                         e.stopPropagation();
-                                        onAddToCart(product);
+                                        addToCart(product);
                                     }}
                                     className="bg-white text-black p-3 rounded-full hover:scale-110 transition-transform"
                                  >
