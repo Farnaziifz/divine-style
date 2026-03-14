@@ -2,6 +2,7 @@ import React from 'react';
 import { ArrowRight, ArrowLeft } from 'lucide-react';
 import { Product } from '../../types';
 import { useLanguage } from '../../contexts/LanguageContext';
+import { formatPriceToman } from '../../utils/format';
 
 interface HeroProps {
   featuredProduct: Product;
@@ -54,7 +55,7 @@ export const Hero: React.FC<HeroProps> = ({ featuredProduct, onAddToCart }) => {
                     <p className="text-xs text-zafting-text/80 mt-1 font-sans font-light">
                         {featuredProduct.description}
                     </p>
-                    <p className="text-lg font-medium mt-2">${featuredProduct.price}</p>
+                    <p className="text-lg font-medium mt-2">{formatPriceToman(featuredProduct.price)}</p>
                 </div>
                 <button 
                     onClick={() => onAddToCart(featuredProduct)}

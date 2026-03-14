@@ -18,24 +18,24 @@ export const Navbar: React.FC = () => {
 
   const handleNavClick = (key: string) => {
     if (key === 'nav.menu.shop') {
-        navigate('/shop');
+        navigate(`/${language}/shop`);
     } else if (key === 'nav.menu.collections') {
-        navigate('/');
+        navigate(`/${language}`);
     }
     setIsMenuOpen(false);
   };
 
   const handleAuthClick = () => {
     if (isAuthenticated) {
-      navigate('/profile');
+      navigate(`/${language}/dashboard`);
     } else {
-      navigate('/auth');
+      navigate(`/${language}/auth`);
     }
   };
 
   const menuItems = [
-    { key: 'nav.menu.shop', href: '/shop' },
-    { key: 'nav.menu.collections', href: '/' },
+    { key: 'nav.menu.shop', href: `/${language}/shop` },
+    { key: 'nav.menu.collections', href: `/${language}` },
     // These could be actual routes later
     { key: 'nav.menu.blog', href: '#' },
     { key: 'nav.menu.about', href: '#' },
@@ -45,7 +45,7 @@ export const Navbar: React.FC = () => {
   return (
     <>
       <nav className="fixed top-0 start-0 w-full z-40 px-6 py-6 flex justify-between items-center mix-blend-multiply pointer-events-none">
-        <Link to="/" className="pointer-events-auto text-xl tracking-widest font-sans font-medium text-zafting-text uppercase z-50">
+        <Link to={`/${language}`} className="pointer-events-auto text-xl tracking-widest font-sans font-medium text-zafting-text uppercase z-50">
           {t('nav.title')}
         </Link>
         

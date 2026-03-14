@@ -2,6 +2,7 @@ import React from 'react';
 import { X, ArrowRight, ArrowLeft } from 'lucide-react';
 import { useCart } from '../../contexts/CartContext';
 import { useLanguage } from '../../contexts/LanguageContext';
+import { formatPriceToman } from '../../utils/format';
 
 export const CartSidebar: React.FC = () => {
   const { cart, isCartOpen, setIsCartOpen, removeFromCart, cartTotal } = useCart();
@@ -37,7 +38,7 @@ export const CartSidebar: React.FC = () => {
                      {t(`product.category.${item.category}`)}
                   </p>
                   <div className="flex justify-between items-center mt-2">
-                    <span className="font-medium">${item.discountPrice || item.price}</span>
+                    <span className="font-medium">{formatPriceToman(item.discountPrice || item.price)}</span>
                     <span className="text-xs opacity-50">{t('cart.qty')}: {item.quantity}</span>
                   </div>
                 </div>
@@ -57,7 +58,7 @@ export const CartSidebar: React.FC = () => {
             <div className="border-t border-zafting-text/10 pt-6 mt-4">
                 <div className="flex justify-between items-center mb-6 text-xl font-serif">
                     <span>{t('cart.total')}</span>
-                    <span>${cartTotal}</span>
+                    <span>{formatPriceToman(cartTotal)}</span>
                 </div>
                 <button className="w-full bg-zafting-text text-[#E8E0D9] py-4 rounded-full font-bold uppercase tracking-widest hover:bg-zafting-accent transition-colors flex items-center justify-center gap-2">
                     {t('cart.checkout')}

@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
 
 export type Language = 'en' | 'fa';
 export type Direction = 'ltr' | 'rtl';
@@ -25,6 +26,7 @@ const translations: Record<Language, Record<string, string>> = {
     'hero.headline.3': 'dresses',
     'hero.cta': 'Shop Collection',
     'collection.title': 'Curated Collection',
+    'home.intro': 'Intro',
     'cart.title': 'Your Bag',
     'cart.empty': 'Your bag is empty.',
     'cart.total': 'Total',
@@ -114,12 +116,26 @@ const translations: Record<Language, Record<string, string>> = {
     'auth.login.footer': 'Dont have an account?',
     'auth.login.signup': 'Sign up now',
     'auth.otp.title': 'Verify your number',
-    'auth.otp.desc': 'Please enter the 4-digit code sent to',
+    'auth.otp.desc': 'Please enter the 5-digit code sent to',
     'auth.otp.btn': 'Verify & Sign In',
     'auth.otp.resend': 'Resend Code',
     'auth.otp.back': 'Change Number',
     'profile.title': 'My Profile',
-    'profile.logout': 'Logout'
+    'profile.logout': 'Logout',
+    'dashboard.menu.profile': 'Profile',
+    'dashboard.menu.orders': 'Orders',
+    'dashboard.menu.favorites': 'Favorites',
+    'dashboard.menu.cart': 'Shopping List',
+    'dashboard.orders.title': 'My Orders',
+    'dashboard.orders.empty': 'You have no orders yet.',
+    'dashboard.favorites.title': 'Favorites',
+    'dashboard.favorites.empty': 'Your favorites list is empty.',
+    'dashboard.cart.title': 'Shopping List',
+    'dashboard.cart.empty': 'Your bag is empty.',
+    'dashboard.shopping_list.empty': 'Your shopping list is empty.',
+    'product.shopping_list.add': 'Add to Shopping List',
+    'product.shopping_list.remove': 'Remove from List',
+    'product.shopping_list.login_to_add': 'Login to save to list'
   },
   fa: {
     'nav.title': 'دیواین',
@@ -133,6 +149,7 @@ const translations: Record<Language, Record<string, string>> = {
     'hero.headline.3': 'وینتیج شما',
     'hero.cta': 'مشاهده مجموعه',
     'collection.title': 'مجموعه منتخب',
+    'home.intro': 'اینترو',
     'cart.title': 'سبد خرید',
     'cart.empty': 'سبد خرید شما خالی است.',
     'cart.total': 'جمع کل',
@@ -222,30 +239,80 @@ const translations: Record<Language, Record<string, string>> = {
     'auth.login.footer': 'حساب کاربری ندارید؟',
     'auth.login.signup': 'ثبت نام کنید',
     'auth.otp.title': 'تایید شماره',
-    'auth.otp.desc': 'لطفا کد ۴ رقمی ارسال شده به شماره زیر را وارد کنید',
+    'auth.otp.desc': 'لطفا کد ۵ رقمی ارسال شده به شماره زیر را وارد کنید',
     'auth.otp.btn': 'تایید و ورود',
     'auth.otp.resend': 'ارسال مجدد کد',
     'auth.otp.back': 'تغییر شماره',
     'profile.title': 'پروفایل من',
-    'profile.logout': 'خروج'
+    'profile.logout': 'خروج',
+    'dashboard.menu.profile': 'پروفایل',
+    'dashboard.menu.orders': 'سفارشات',
+    'dashboard.menu.favorites': 'علاقمندی‌ها',
+    'dashboard.menu.cart': 'لیست خرید',
+    'dashboard.orders.title': 'سفارشات من',
+    'dashboard.orders.empty': 'هنوز سفارشی ثبت نشده است.',
+    'dashboard.favorites.title': 'علاقمندی‌ها',
+    'dashboard.favorites.empty': 'لیست علاقمندی‌های شما خالی است.',
+    'dashboard.cart.title': 'لیست خرید',
+    'dashboard.cart.empty': 'سبد خرید شما خالی است.',
+    'dashboard.shopping_list.empty': 'لیست خرید شما خالی است.',
+    'product.shopping_list.add': 'افزودن به لیست خرید',
+    'product.shopping_list.remove': 'حذف از لیست',
+    'product.shopping_list.login_to_add': 'ورود برای ذخیره در لیست خرید'
   }
 };
 
 export const LanguageProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [language, setLanguage] = useState<Language>('fa');
-  const direction = language === 'fa' ? 'rtl' : 'ltr';
+  const [direction, setDirection] = useState<Direction>('rtl');
+  
+  const navigate = useNavigate();
+  const location = useLocation();
+  const params = useParams();
 
+  // Sync state with URL parameter
   useEffect(() => {
-    document.documentElement.dir = direction;
-    document.documentElement.lang = language;
-  }, [direction, language]);
+    // Check if the path starts with /en or /fa
+    const pathSegments = location.pathname.split('/');
+    const langSegment = pathSegments[1] as Language;
 
-  const t = (key: string) => {
+    if (langSegment === 'en' || langSegment === 'fa') {
+      if (langSegment !== language) {
+        setLanguage(langSegment);
+      }
+    }
+  }, [location.pathname]);
+
+  // Update direction and HTML attributes when language changes
+  useEffect(() => {
+    setDirection(language === 'fa' ? 'rtl' : 'ltr');
+    document.documentElement.dir = language === 'fa' ? 'rtl' : 'ltr';
+    document.documentElement.lang = language;
+  }, [language]);
+
+  const handleSetLanguage = (lang: Language) => {
+    if (lang === language) return;
+    
+    // Replace current language in URL with new language
+    const pathSegments = location.pathname.split('/');
+    // If the URL already has a language prefix (it should based on our routing)
+    if (pathSegments[1] === 'en' || pathSegments[1] === 'fa') {
+        pathSegments[1] = lang;
+        const newPath = pathSegments.join('/');
+        navigate(newPath);
+    } else {
+        // Fallback or root case
+        navigate(`/${lang}${location.pathname}`);
+    }
+    setLanguage(lang);
+  };
+
+  const t = (key: string): string => {
     return translations[language][key] || key;
   };
 
   return (
-    <LanguageContext.Provider value={{ language, direction, setLanguage, t }}>
+    <LanguageContext.Provider value={{ language, direction, setLanguage: handleSetLanguage, t }}>
       {children}
     </LanguageContext.Provider>
   );

@@ -1,11 +1,29 @@
-import React, { useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '../contexts/LanguageContext';
 import { ArrowRight, ArrowLeft, ArrowDownLeft, ShoppingBag, ArrowUpRight } from 'lucide-react';
 import { PRODUCTS } from '../constants';
 
+type ApiCategory = {
+  id: string;
+  title: string;
+  slug: string;
+  image?: string | null;
+  parentId?: string | null;
+};
+
+type PaginatedResponse<T> = {
+  data: T[];
+  meta: {
+    total: number;
+    page: number;
+    limit: number;
+    lastPage: number;
+  };
+};
+
 export const Shop: React.FC = () => {
-  const { t, direction } = useLanguage();
+  const { t, direction, language } = useLanguage();
   const navigate = useNavigate();
   const ArrowIcon = direction === 'rtl' ? ArrowLeft : ArrowRight;
   
@@ -42,14 +60,33 @@ export const Shop: React.FC = () => {
   ];
 
   // Categories Data
-  const categories = [
-    { id: 'pants', label: t('shop.cat.pants'), img: 'https://images.unsplash.com/photo-1594633312681-425c7b97ccd1?q=80&w=600&auto=format&fit=crop' },
-    { id: 'lingerie', label: t('shop.cat.lingerie'), img: 'https://images.unsplash.com/photo-1596472537510-d3c761bb6aac?q=80&w=600&auto=format&fit=crop' },
-    { id: 'sleepwear', label: t('shop.cat.sleepwear'), img: 'https://images.unsplash.com/photo-1515934751635-c81c6bc9a2d8?q=80&w=600&auto=format&fit=crop' },
-    { id: 'tops', label: t('shop.cat.tops'), img: 'https://images.unsplash.com/photo-1551163943-3f6a2b03d289?q=80&w=600&auto=format&fit=crop' },
-    { id: 'shoes', label: t('shop.cat.shoes'), img: 'https://images.unsplash.com/photo-1543163521-1bf539c55dd2?q=80&w=600&auto=format&fit=crop' },
-    { id: 'accessories', label: t('shop.cat.accessories'), img: 'https://images.unsplash.com/photo-1611591437281-460bfbe1220a?q=80&w=600&auto=format&fit=crop' },
-  ];
+  const fallbackCategoryImages = useMemo(
+    () => [
+      'https://images.unsplash.com/photo-1594633312681-425c7b97ccd1?q=80&w=1200&auto=format&fit=crop',
+      'https://images.unsplash.com/photo-1596472537510-d3c761bb6aac?q=80&w=1200&auto=format&fit=crop',
+      'https://images.unsplash.com/photo-1515934751635-c81c6bc9a2d8?q=80&w=1200&auto=format&fit=crop',
+      'https://images.unsplash.com/photo-1551163943-3f6a2b03d289?q=80&w=1200&auto=format&fit=crop',
+      'https://images.unsplash.com/photo-1543163521-1bf539c55dd2?q=80&w=1200&auto=format&fit=crop',
+      'https://images.unsplash.com/photo-1611591437281-460bfbe1220a?q=80&w=1200&auto=format&fit=crop',
+    ],
+    []
+  );
+
+  const apiBaseUrl = useMemo(
+    () => import.meta.env.VITE_API_URL || 'http://localhost:3005',
+    []
+  );
+
+  const getImageUrl = (path?: string | null) => {
+    if (!path) return undefined;
+    if (path.startsWith('http') || path.startsWith('blob:') || path.startsWith('data:')) {
+      return path;
+    }
+    return `${apiBaseUrl}${path}`;
+  };
+
+  const [categories, setCategories] = useState<ApiCategory[]>([]);
+  const [isCategoriesLoading, setIsCategoriesLoading] = useState(true);
 
   // Create a longer list for scrolling demonstration
   const scrollList = [...collections, ...collections];
@@ -90,6 +127,29 @@ export const Shop: React.FC = () => {
         };
     }
   };
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      setIsCategoriesLoading(true);
+      try {
+        const res = await fetch(`${apiBaseUrl}/categories?page=1&limit=100`);
+        const json = (await res.json()) as PaginatedResponse<ApiCategory>;
+        const unique = new Map<string, ApiCategory>();
+        (json.data || []).forEach((c) => unique.set(c.id, c));
+        const list = Array.from(unique.values());
+        const ids = new Set(list.map((c) => c.id));
+
+        const roots = list.filter((c) => !c.parentId || !ids.has(c.parentId));
+        setCategories(roots.length > 0 ? roots : list);
+      } catch (error) {
+        console.error('Failed to fetch categories', error);
+        setCategories([]);
+      } finally {
+        setIsCategoriesLoading(false);
+      }
+    };
+    fetchCategories();
+  }, [apiBaseUrl]);
 
   return (
     <div className="w-full bg-[#E8E0D9] min-h-screen pt-20">
@@ -278,35 +338,39 @@ export const Shop: React.FC = () => {
             </h2>
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6">
-             {categories.map((cat, idx) => (
-                 <div 
+          {isCategoriesLoading ? (
+            <div className="flex justify-center py-16 text-zafting-text/60">
+              <span className="text-sm uppercase tracking-widest">{t('loading') || 'Loading...'}</span>
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6">
+              {categories.map((cat, idx) => {
+                const img = getImageUrl(cat.image) || fallbackCategoryImages[idx % fallbackCategoryImages.length];
+                return (
+                  <div 
                     key={cat.id} 
                     className={`group relative h-[300px] md:h-[400px] rounded-[2rem] overflow-hidden cursor-pointer ${idx % 2 === 0 ? 'mt-0' : 'md:mt-8'}`}
-                    onClick={() => navigate(`/category/${cat.id}`)}
-                 >
-                     {/* Image with zoom effect */}
-                     <img 
-                        src={cat.img} 
-                        alt={cat.label} 
-                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                     />
-                     
-                     {/* Overlay */}
-                     <div className="absolute inset-0 bg-black/20 group-hover:bg-black/30 transition-colors duration-500"></div>
-                     
-                     {/* Content */}
-                     <div className="absolute bottom-0 start-0 w-full p-6 flex justify-between items-end">
-                         <div className="bg-[#E8E0D9]/90 backdrop-blur-md px-6 py-3 rounded-full">
-                            <h3 className="font-serif text-lg md:text-xl text-zafting-text">{cat.label}</h3>
-                         </div>
-                         <div className="w-12 h-12 bg-white text-zafting-text rounded-full flex items-center justify-center transform translate-y-12 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300">
-                             <ArrowUpRight size={20} />
-                         </div>
-                     </div>
-                 </div>
-             ))}
-          </div>
+                    onClick={() => navigate(`/${language}/category/${cat.id}`)}
+                  >
+                    <img 
+                      src={img} 
+                      alt={cat.title} 
+                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                    />
+                    <div className="absolute inset-0 bg-black/20 group-hover:bg-black/30 transition-colors duration-500"></div>
+                    <div className="absolute bottom-0 start-0 w-full p-6 flex justify-between items-end">
+                      <div className="bg-[#E8E0D9]/90 backdrop-blur-md px-6 py-3 rounded-full">
+                        <h3 className="font-serif text-lg md:text-xl text-zafting-text">{cat.title}</h3>
+                      </div>
+                      <div className="w-12 h-12 bg-white text-zafting-text rounded-full flex items-center justify-center transform translate-y-12 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300">
+                        <ArrowUpRight size={20} />
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
       </section>
 
     </div>

@@ -2,6 +2,7 @@ import React from 'react';
 import { Product } from '../../types';
 import { Plus } from 'lucide-react';
 import { useLanguage } from '../../contexts/LanguageContext';
+import { formatPriceToman } from '../../utils/format';
 
 interface ProductGridProps {
   products: Product[];
@@ -50,7 +51,7 @@ export const ProductGrid: React.FC<ProductGridProps> = ({ products, onAddToCart,
                       {t(`product.category.${product.category}`) || product.category}
                     </p>
                 </div>
-                <span className="font-medium text-zafting-text">${product.price}</span>
+                <span className="font-medium text-zafting-text">{formatPriceToman(product.price)}</span>
             </div>
           </div>
         ))}

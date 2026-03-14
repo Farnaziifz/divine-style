@@ -5,13 +5,14 @@ import { PRODUCTS } from '../constants';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useCart } from '../contexts/CartContext';
 import { ArrowLeft, ArrowRight, ShoppingBag } from 'lucide-react';
+import { formatPriceToman } from '../utils/format';
 
 export const StyleInspiration: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const product = PRODUCTS.find(p => p.id === id);
   const navigate = useNavigate();
   const { addToCart } = useCart();
-  const { t, direction } = useLanguage();
+  const { t, direction, language } = useLanguage();
   const BackArrow = direction === 'rtl' ? ArrowRight : ArrowLeft;
 
   if (!product) return <div>Product not found</div>;
@@ -112,7 +113,7 @@ export const StyleInspiration: React.FC = () => {
                     onClick={() => addToCart(product)}
                     className="bg-[#E8E0D9] text-zafting-text px-10 py-4 rounded-full text-sm uppercase tracking-widest hover:scale-105 transition-transform font-bold"
                   >
-                      {t('shop.btn.buy')} - ${product.price}
+                      {t('shop.btn.buy')} - {formatPriceToman(product.price)}
                   </button>
               </div>
               
@@ -139,7 +140,7 @@ export const StyleInspiration: React.FC = () => {
                         <div 
                             key={p.id} 
                             className="group relative w-[220px] flex flex-col items-center cursor-pointer pt-6"
-                            onClick={() => navigate(`/product/${p.id}`)}
+                            onClick={() => navigate(`/${language}/product/${p.id}`)}
                         >
                             {/* Hanger Hook Visual */}
                             <div className="absolute top-[-10px] w-4 h-8 border-t-4 border-l-4 border-r-4 border-gray-400 rounded-t-full z-10"></div>
@@ -150,7 +151,7 @@ export const StyleInspiration: React.FC = () => {
                                 
                                 <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-center items-center text-white p-4 text-center backdrop-blur-[1px]">
                                     <h4 className="font-serif text-xl mb-1 translate-y-4 group-hover:translate-y-0 transition-transform duration-300">{p.name}</h4>
-                                    <p className="text-sm opacity-80 mb-3">${p.price}</p>
+                                    <p className="text-sm opacity-80 mb-3">{formatPriceToman(p.price)}</p>
                                     <button className="p-2 bg-white text-black rounded-full hover:scale-110 transition-transform">
                                         <ShoppingBag size={16} />
                                     </button>

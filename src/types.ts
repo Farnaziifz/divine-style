@@ -8,6 +8,18 @@ export interface Review {
   role?: string; // e.g. "Verified Buyer"
 }
 
+/** واریانت محصول: هر ترکیب سایز + رنگ مشخصات و قیمت خودش را دارد */
+export interface ProductVariant {
+  size?: string;
+  color?: string;
+  colorCode?: string;
+  price: number;
+  discountPrice?: number;
+  stock: number;
+  /** مشخصات این واریانت (سایز+رنگ) */
+  specifications?: Record<string, string | number>;
+}
+
 export interface Product {
   id: string;
   name: string;
@@ -35,12 +47,17 @@ export interface Product {
       length: number;
       sleeve?: number;
     };
+    /** مشخصات خام از API برای نمایش در جدول اندازه (مثلاً dor_sine، height، qad_astin، baft) */
+    specifications?: Record<string, string | number>;
   }[];
+  /** واریانت‌ها (هر ترکیب سایز+رنگ با مشخصات و قیمت خودش) */
+  variants?: ProductVariant[];
 }
 
 export interface CartItem extends Product {
   quantity: number;
   selectedSize?: string;
+  selectedColor?: string;
 }
 
 export type ChatRole = 'user' | 'model';

@@ -1,41 +1,133 @@
-import React, { useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Product } from '../types';
-import { PRODUCTS } from '../constants';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useCart } from '../contexts/CartContext';
 import { Filter, SlidersHorizontal, ArrowRight, ArrowLeft, Percent, ShoppingBag } from 'lucide-react';
+import { formatPriceToman } from '../utils/format';
+
+type ApiProductVariant = {
+  sku: string;
+  price: number | string;
+  discountPrice?: number | string | null;
+  discountPercent?: number | null;
+  stock: number;
+};
+
+type ApiProduct = {
+  id: string;
+  title: string;
+  description: string;
+  images: string[];
+  category?: { id: string; title: string };
+  categoryId: string;
+  variants?: ApiProductVariant[];
+};
+
+type ApiCategory = {
+  id: string;
+  title: string;
+  parentId?: string | null;
+};
+
+type PaginatedResponse<T> = {
+  data: T[];
+  meta: { total: number; page: number; limit: number; lastPage: number };
+};
 
 export const Category: React.FC = () => {
   const { id: categoryId } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { addToCart } = useCart();
-  const { t, direction } = useLanguage();
+  const { t, direction, language } = useLanguage();
   const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [isLoading, setIsLoading] = useState(true);
+  const [categoryTitle, setCategoryTitle] = useState<string>('');
+  const [products, setProducts] = useState<Product[]>([]);
   // Animation State
   const [animatingProduct, setAnimatingProduct] = useState<{ product: Product, rect: DOMRect } | null>(null);
 
   const itemsPerPage = 5;
 
-  // Filter products by category
-  let filterCategory = '';
-  if (categoryId === 'pants') filterCategory = 'Pants';
-  if (categoryId === 'lingerie') filterCategory = 'Lingerie';
-  if (categoryId === 'sleepwear') filterCategory = 'Sleepwear';
-  if (categoryId === 'tops') filterCategory = 'Tops';
-  if (categoryId === 'shoes') filterCategory = 'Shoes';
-  
-  const allCategoryProducts = PRODUCTS.filter(p => 
-    filterCategory ? p.category === filterCategory : true
+  const apiBaseUrl = useMemo(
+    () => import.meta.env.VITE_API_URL || 'http://localhost:3005',
+    []
   );
 
-  const saleProducts = allCategoryProducts.filter(p => p.discountPrice);
-  const regularProducts = allCategoryProducts.filter(p => !p.discountPrice);
+  const getImageUrl = (path?: string | null) => {
+    if (!path) return '';
+    if (path.startsWith('http') || path.startsWith('blob:') || path.startsWith('data:')) {
+      return path;
+    }
+    return `${apiBaseUrl}${path}`;
+  };
 
-  const totalPages = Math.ceil(regularProducts.length / itemsPerPage) || 1;
-  const currentRackProducts = regularProducts.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
-  
-  const featuredProduct = regularProducts[0]; 
+  const toUiProduct = (p: ApiProduct): Product => {
+    const firstVariant = p.variants?.[0];
+    const priceRaw = firstVariant?.price ?? 0;
+    const discountPriceRaw = firstVariant?.discountPrice;
+    const price = typeof priceRaw === 'string' ? Number(priceRaw) || 0 : Number(priceRaw);
+    const discountPrice =
+      discountPriceRaw != null && discountPriceRaw !== ''
+        ? typeof discountPriceRaw === 'string'
+          ? Number(discountPriceRaw) || undefined
+          : Number(discountPriceRaw)
+        : undefined;
+
+    return {
+      id: p.id,
+      name: p.title,
+      price,
+      discountPrice,
+      description: p.description ?? '',
+      image: getImageUrl(p.images?.[0]) || '',
+      gallery: (p.images || []).map((img) => getImageUrl(img)),
+      category: p.category?.title || '',
+    };
+  };
+
+  useEffect(() => {
+    const fetchCategoryAndProducts = async () => {
+      if (!categoryId) return;
+      setIsLoading(true);
+      try {
+        const [catRes, productsRes] = await Promise.all([
+          fetch(`${apiBaseUrl}/categories/${categoryId}`),
+          fetch(
+            `${apiBaseUrl}/products?categoryId=${categoryId}&page=${currentPage}&limit=${itemsPerPage}`,
+          ),
+        ]);
+
+        if (catRes.ok) {
+          const cat = (await catRes.json()) as ApiCategory;
+          setCategoryTitle(cat.title);
+        } else {
+          setCategoryTitle('');
+        }
+
+        const json = (await productsRes.json()) as PaginatedResponse<ApiProduct>;
+        setProducts((json.data || []).map(toUiProduct));
+        setTotalPages(json.meta?.lastPage || 1);
+      } catch (error) {
+        console.error('Failed to fetch category/products', error);
+        setProducts([]);
+        setTotalPages(1);
+        setCategoryTitle('');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchCategoryAndProducts();
+  }, [apiBaseUrl, categoryId, currentPage]);
+
+  const saleProducts = products.filter((p) => typeof p.discountPrice === 'number' && p.discountPrice < p.price);
+  const regularProducts = products.filter((p) => !p.discountPrice || p.discountPrice >= p.price);
+  /** رگال: نمایش همهٔ محصولات (هم عادی هم تخفیف‌دار) */
+  const currentRackProducts = products;
+
+  const featuredProduct = regularProducts[0] || saleProducts[0];
 
   const ArrowIcon = direction === 'rtl' ? ArrowLeft : ArrowRight;
   const BackArrowIcon = direction === 'rtl' ? ArrowRight : ArrowLeft;
@@ -50,10 +142,10 @@ export const Category: React.FC = () => {
           // 2. Wait for animation to finish then navigate
           // Match duration with CSS transition duration
           setTimeout(() => {
-              navigate(`/product/${product.id}`);
+              navigate(`/${language}/product/${product.id}`);
           }, 800);
       } else {
-          navigate(`/product/${product.id}`);
+          navigate(`/${language}/product/${product.id}`);
       }
   };
 
@@ -116,11 +208,11 @@ export const Category: React.FC = () => {
       {/* 1. Header & Filters */}
       <header className="px-6 md:px-12 mb-12 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
         <div>
-          <button onClick={() => navigate('/shop')} className="flex items-center gap-2 text-xs uppercase tracking-widest opacity-60 hover:opacity-100 transition-opacity mb-2">
+          <button onClick={() => navigate(`/${language}/shop`)} className="flex items-center gap-2 text-xs uppercase tracking-widest opacity-60 hover:opacity-100 transition-opacity mb-2">
             <BackArrowIcon size={14} /> {t('shop.cat.title')}
           </button>
           <h1 className="font-serif text-5xl md:text-7xl text-zafting-text">
-            {t(`shop.cat.${categoryId}`) || categoryId}
+            {categoryTitle || categoryId}
           </h1>
         </div>
 
@@ -152,7 +244,14 @@ export const Category: React.FC = () => {
               <div className="md:w-2/3">
                   <h3 className="font-serif text-4xl mb-4">{featuredProduct.name}</h3>
                   <p className="opacity-70 text-lg leading-relaxed max-w-md mb-6">{featuredProduct.description}</p>
-                  <p className="text-2xl mb-6">${featuredProduct.price}</p>
+                  {typeof featuredProduct.discountPrice === 'number' && featuredProduct.discountPrice < featuredProduct.price ? (
+                    <div className="flex items-baseline gap-4 mb-6">
+                      <p className="text-2xl font-medium">{formatPriceToman(featuredProduct.discountPrice)}</p>
+                      <p className="text-lg opacity-60 line-through">{formatPriceToman(featuredProduct.price)}</p>
+                    </div>
+                  ) : (
+                    <p className="text-2xl mb-6">{formatPriceToman(featuredProduct.price)}</p>
+                  )}
                   <button 
                     onClick={() => addToCart(featuredProduct)}
                     className="bg-zafting-text text-[#E8E0D9] px-8 py-4 rounded-full uppercase tracking-widest hover:scale-105 transition-transform"
@@ -195,7 +294,18 @@ export const Category: React.FC = () => {
          {/* Hanging Items Scroll Area */}
          <div className="overflow-x-auto pb-12 pt-6 px-6 md:px-12 [&::-webkit-scrollbar]:hidden" style={{ scrollbarWidth: 'none' }}>
             <div className="flex gap-4 md:gap-8 min-w-max">
-                {currentRackProducts.map((product) => (
+                {isLoading ? (
+                  <div className="py-24 text-zafting-text/60">
+                    <span className="text-sm uppercase tracking-widest">{t('loading') || 'Loading...'}</span>
+                  </div>
+                ) : currentRackProducts.length === 0 ? (
+                  <div className="py-24 text-zafting-text/60">
+                    <span className="text-sm uppercase tracking-widest">
+                      {t('empty') || 'No products found'}
+                    </span>
+                  </div>
+                ) : (
+                currentRackProducts.map((product) => (
                     <div 
                         key={product.id} 
                         className="group relative w-[280px] flex flex-col items-center pt-8 cursor-pointer"
@@ -211,7 +321,7 @@ export const Category: React.FC = () => {
                              {/* Hover Overlay */}
                              <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-center items-center text-white p-4 text-center backdrop-blur-[2px]">
                                  <h4 className="font-serif text-2xl mb-2 translate-y-4 group-hover:translate-y-0 transition-transform duration-300">{product.name}</h4>
-                                 <p className="text-lg font-medium mb-4">${product.price}</p>
+                                 <p className="text-lg font-medium mb-4">{formatPriceToman(product.price)}</p>
                                  <button 
                                     onClick={(e) => {
                                         e.stopPropagation();
@@ -224,7 +334,8 @@ export const Category: React.FC = () => {
                              </div>
                         </div>
                     </div>
-                ))}
+                ))
+                )}
             </div>
          </div>
       </section>
@@ -254,14 +365,16 @@ export const Category: React.FC = () => {
                          <div className="relative aspect-square bg-white/10 rounded-2xl overflow-hidden mb-4 border border-white/10">
                              <img src={product.image} alt={product.name} className="w-full h-full object-cover mix-blend-overlay group-hover:mix-blend-normal transition-all duration-300" />
                              <div className="absolute top-2 end-2 bg-white text-red-600 font-bold px-2 py-1 rounded text-xs shadow-sm">
-                                -{Math.round(((product.price - (product.discountPrice || 0)) / product.price) * 100)}%
+                               {product.price > 0 && typeof product.discountPrice === 'number'
+                                 ? `-${Math.round(((product.price - product.discountPrice) / product.price) * 100)}%`
+                                 : '-'}
                              </div>
                          </div>
                          <div>
                              <h4 className="font-serif text-lg">{product.name}</h4>
                              <div className="flex gap-3 items-baseline">
-                                 <span className="text-xl font-medium">${product.discountPrice}</span>
-                                 <span className="text-sm opacity-60 line-through">${product.price}</span>
+                                 <span className="text-xl font-medium">{formatPriceToman(product.discountPrice)}</span>
+                                 <span className="text-sm opacity-60 line-through">{formatPriceToman(product.price)}</span>
                              </div>
                          </div>
                      </div>

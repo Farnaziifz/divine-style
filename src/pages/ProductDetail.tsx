@@ -1,37 +1,198 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Product } from '../types';
-import { PRODUCTS } from '../constants';
-import { ArrowLeft, ArrowRight, Star, ShoppingBag, Ruler, Shirt, Layers, Play, X, Rotate3D, Sparkles } from 'lucide-react';
+import { fetchProductById } from '../services/productApi';
+import { ArrowLeft, ArrowRight, Star, ShoppingBag, Ruler, Shirt, Layers, Play, X, Rotate3D, Sparkles, Loader2, ListPlus, ListMinus } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useCart } from '../contexts/CartContext';
+import { useAuth } from '../contexts/AuthContext';
+import { shoppingListService } from '../services/shoppingList.service';
 import { ReviewsSection } from '../components/features/ReviewsSection';
+import { formatPriceToman } from '../utils/format';
 
 export const ProductDetail: React.FC = () => {
-  const { id } = useParams<{ id: string }>();
-  const product = PRODUCTS.find(p => p.id === id);
+  const { id, lang } = useParams<{ id: string; lang?: string }>();
   const navigate = useNavigate();
   const { addToCart } = useCart();
-  const { t, direction } = useLanguage();
+  const { isAuthenticated } = useAuth();
+  const { t, direction, language } = useLanguage();
   const BackArrow = direction === 'rtl' ? ArrowRight : ArrowLeft;
   const ForwardArrow = direction === 'rtl' ? ArrowLeft : ArrowRight;
-  
-  const [selectedSize, setSelectedSize] = useState<string>(product?.sizes?.[2]?.label || 'M'); // Default to M
+
+  const [product, setProduct] = useState<Product | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [selectedSize, setSelectedSize] = useState<string>('M');
+  const [selectedColor, setSelectedColor] = useState<string>('');
   const [isGalleryOpen, setIsGalleryOpen] = useState(false);
   const [isVideoOpen, setIsVideoOpen] = useState(false);
   const [galleryRotateY, setGalleryRotateY] = useState(0);
+  const [inShoppingList, setInShoppingList] = useState(false);
+  const [loadingShoppingList, setLoadingShoppingList] = useState(false);
 
-  if (!product) return <div>Product not found</div>;
+  useEffect(() => {
+    if (product?.id && isAuthenticated) {
+      let cancelled = false;
+      shoppingListService
+        .checkInList(product.id)
+        .then((inList) => {
+          if (!cancelled) setInShoppingList(inList);
+        })
+        .catch(() => {
+          if (!cancelled) setInShoppingList(false);
+        });
+      return () => {
+        cancelled = true;
+      };
+    } else {
+      setInShoppingList(false);
+    }
+  }, [product?.id, isAuthenticated]);
 
-  const currentSizeData = product.sizes?.find(s => s.label === selectedSize);
-  
+  const handleShoppingListClick = async () => {
+    if (!product) return;
+    if (!isAuthenticated) {
+      navigate(`/${lang || language}/auth`);
+      return;
+    }
+    setLoadingShoppingList(true);
+    try {
+      if (inShoppingList) {
+        await shoppingListService.remove(product.id);
+        setInShoppingList(false);
+      } else {
+        await shoppingListService.add(product.id);
+        setInShoppingList(true);
+      }
+    } catch {
+      // keep state on error
+    } finally {
+      setLoadingShoppingList(false);
+    }
+  };
+
+  useEffect(() => {
+    if (isGalleryOpen) {
+      setGalleryRotateY(0);
+    }
+  }, [isGalleryOpen]);
+
+  useEffect(() => {
+    if (!product?.variants?.length || !selectedSize) return;
+    const sizeKey = String(selectedSize);
+    const forSize = product.variants
+      .filter((v) => String(v.size ?? '') === sizeKey)
+      .map((v) => (v.color != null ? String(v.color) : ''))
+      .filter(Boolean);
+    const firstColor = forSize[0];
+    const currentColorInList = forSize.includes(String(selectedColor));
+    if (firstColor && !currentColorInList) setSelectedColor(firstColor);
+  }, [product?.variants, selectedSize, selectedColor]);
+
+  useEffect(() => {
+    if (!id) {
+      setIsLoading(false);
+      setError('Missing product id');
+      return;
+    }
+    let cancelled = false;
+    setError(null);
+    setProduct(null);
+    setIsLoading(true);
+    fetchProductById(id)
+      .then((p) => {
+        if (!cancelled) {
+          setProduct(p);
+          const defaultSize =
+            p.sizes?.find((s) => s.available)?.label ??
+            p.sizes?.[0]?.label ??
+            'M';
+          setSelectedSize(String(defaultSize));
+          const defaultSizeStr = String(defaultSize);
+          const firstVariantWithSize = p.variants?.find((v) => String(v.size ?? '') === defaultSizeStr);
+          const allColors = [...new Set((p.variants ?? []).map((v) => v.color).filter(Boolean))];
+          const defaultColor =
+            firstVariantWithSize?.color != null
+              ? String(firstVariantWithSize.color)
+              : (allColors[0] != null ? String(allColors[0]) : '');
+          setSelectedColor(defaultColor ?? '');
+        }
+      })
+      .catch((err) => {
+        if (!cancelled) {
+          setError(err instanceof Error ? err.message : 'Failed to load product');
+        }
+      })
+      .finally(() => {
+        if (!cancelled) setIsLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [id]);
+
+  const colorsForProduct = React.useMemo(
+    () => [...new Set((product?.variants ?? []).map((v) => v.color).filter(Boolean))] as string[],
+    [product?.variants]
+  );
+  const colorsForSize = React.useMemo(
+    () =>
+      selectedSize
+        ? [...new Set(
+            (product?.variants ?? [])
+              .filter((v) => v.size === selectedSize)
+              .map((v) => v.color)
+              .filter(Boolean)
+          )] as string[]
+        : colorsForProduct,
+    [product?.variants, selectedSize, colorsForProduct]
+  );
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-[#E8E0D9] flex items-center justify-center">
+        <Loader2 className="animate-spin text-zafting-text" size={48} />
+      </div>
+    );
+  }
+
+  if (error || !product) {
+    return (
+      <div className="min-h-screen bg-[#E8E0D9] flex flex-col items-center justify-center p-8">
+        <p className="text-zafting-text/80 text-lg mb-4">
+          {error || t('product.not_found') || 'Product not found'}
+        </p>
+        <button
+          onClick={() => navigate(-1)}
+          className="flex items-center gap-2 bg-zafting-text text-[#E8E0D9] px-6 py-3 rounded-full uppercase tracking-widest text-sm hover:scale-105 transition-transform"
+        >
+          <BackArrow size={18} />
+          {t('common.back') || 'Back'}
+        </button>
+      </div>
+    );
+  }
+
+  const sizeKey = String(selectedSize ?? '');
+  const colorKey = String(selectedColor ?? '');
+  const currentSizeData = product.sizes?.find((s) => String(s.label) === sizeKey);
+  const currentVariant =
+    product.variants?.find(
+      (v) =>
+        String(v.size ?? '') === sizeKey &&
+        (colorKey ? String(v.color ?? '') === colorKey : true)
+    ) ??
+    product.variants?.find((v) => String(v.size ?? '') === sizeKey);
+
   // Use existing gallery or fallback to main image repeated
   const galleryImages = product.gallery && product.gallery.length > 0 
     ? product.gallery 
     : [product.image, product.image, product.image, product.image, product.image];
 
+  const galleryRotationStep = galleryImages.length > 0 ? 360 / galleryImages.length : 60;
+
   const handleGalleryRotate = (dir: 'left' | 'right') => {
-      setGalleryRotateY(prev => prev + (dir === 'left' ? 60 : -60));
+      setGalleryRotateY(prev => prev + (dir === 'left' ? galleryRotationStep : -galleryRotationStep));
   };
 
   return (
@@ -191,13 +352,22 @@ export const ProductDetail: React.FC = () => {
               </h1>
 
               <div className="text-3xl font-medium text-zafting-text mb-8 flex items-center gap-4">
-                 {product.discountPrice ? (
+                 {currentVariant ? (
+                   currentVariant.discountPrice != null && currentVariant.discountPrice < currentVariant.price ? (
+                     <>
+                       <span className="text-red-700">{formatPriceToman(currentVariant.discountPrice)}</span>
+                       <span className="text-xl opacity-40 line-through">{formatPriceToman(currentVariant.price)}</span>
+                     </>
+                   ) : (
+                     <span>{formatPriceToman(currentVariant.price)}</span>
+                   )
+                 ) : product.discountPrice ? (
                    <>
-                     <span className="text-red-700">${product.discountPrice}</span>
-                     <span className="text-xl opacity-40 line-through">${product.price}</span>
+                     <span className="text-red-700">{formatPriceToman(product.discountPrice)}</span>
+                     <span className="text-xl opacity-40 line-through">{formatPriceToman(product.price)}</span>
                    </>
                  ) : (
-                   <span>${product.price}</span>
+                   <span>{formatPriceToman(product.price)}</span>
                  )}
               </div>
 
@@ -254,38 +424,91 @@ export const ProductDetail: React.FC = () => {
                 </div>
               )}
 
-              {/* Dynamic Measurement Chart */}
-              {currentSizeData && (
-                  <div className="mb-12 bg-white/30 rounded-2xl p-6 border border-white/50 transition-all duration-300">
+              {/* Color Selector — هر رنگ مشخصات خودش را دارد */}
+              {colorsForProduct.length > 0 && (
+                <div className="mb-10">
+                  <h3 className="font-sans uppercase text-sm tracking-widest font-bold text-zafting-text/80 mb-4">
+                    {t('product.select_color') || 'رنگ'}
+                  </h3>
+                  <div className="flex flex-wrap gap-3">
+                    {colorsForSize.map((color) => (
+                      <button
+                        key={color}
+                        type="button"
+                        onClick={() => setSelectedColor(color)}
+                        className={`px-4 py-2 rounded-full border text-sm font-medium transition-all ${
+                          selectedColor === color
+                            ? 'bg-zafting-text text-[#E8E0D9] border-zafting-text'
+                            : 'bg-transparent border-zafting-text/30 text-zafting-text hover:border-zafting-text'
+                        }`}
+                      >
+                        {color}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Dynamic Measurement Chart — مقادیر بر اساس سایز + رنگ انتخاب‌شده به‌روز می‌شوند */}
+              {(currentSizeData || currentVariant) && (
+                  <div className="mb-12 bg-white/30 rounded-2xl p-6 border border-white/50 transition-all duration-300" key={`${selectedSize}-${selectedColor}`}>
                       <div className="flex items-center gap-2 mb-4 text-zafting-text/60">
                            <Ruler size={16} />
-                           <span className="text-xs uppercase tracking-widest font-bold">{t('product.size_guide')} — {selectedSize}</span>
+                           <span className="text-xs uppercase tracking-widest font-bold">
+                             {t('product.size_guide')} — {selectedSize}
+                             {selectedColor ? ` · ${selectedColor}` : ''}
+                           </span>
                       </div>
-                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                          <div className="flex flex-col">
+                      {(() => {
+                        const specs = currentVariant?.specifications ?? currentSizeData?.specifications;
+                        if (specs && Object.keys(specs).length > 0) {
+                          return (
+                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                              {Object.entries(specs).map(([specKey, specVal]) => (
+                                <div key={specKey} className="flex flex-col">
+                                  <span className="text-xs opacity-50 uppercase">{specKey.replace(/_/g, ' ')}</span>
+                                  <span className="font-serif text-xl">{String(specVal)}</span>
+                                </div>
+                              ))}
+                            </div>
+                          );
+                        }
+                        const d = currentSizeData?.dims;
+                        if (!d) return null;
+                        return (
+                          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                            <div className="flex flex-col">
                               <span className="text-xs opacity-50 uppercase">{t('measure.bust')}</span>
-                              <span className="font-serif text-xl">{currentSizeData.dims.bust}</span>
-                          </div>
-                          <div className="flex flex-col">
+                              <span className="font-serif text-xl">{d.bust}</span>
+                            </div>
+                            <div className="flex flex-col">
                               <span className="text-xs opacity-50 uppercase">{t('measure.waist')}</span>
-                              <span className="font-serif text-xl">{currentSizeData.dims.waist}</span>
-                          </div>
-                          <div className="flex flex-col">
+                              <span className="font-serif text-xl">{d.waist}</span>
+                            </div>
+                            <div className="flex flex-col">
                               <span className="text-xs opacity-50 uppercase">{t('measure.hips')}</span>
-                              <span className="font-serif text-xl">{currentSizeData.dims.hips}</span>
-                          </div>
-                          <div className="flex flex-col">
+                              <span className="font-serif text-xl">{d.hips}</span>
+                            </div>
+                            <div className="flex flex-col">
                               <span className="text-xs opacity-50 uppercase">{t('measure.length')}</span>
-                              <span className="font-serif text-xl">{currentSizeData.dims.length}</span>
+                              <span className="font-serif text-xl">{d.length}</span>
+                            </div>
+                            {d.sleeve != null && (
+                              <div className="flex flex-col">
+                                <span className="text-xs opacity-50 uppercase">{t('measure.sleeve')}</span>
+                                <span className="font-serif text-xl">{d.sleeve}</span>
+                              </div>
+                            )}
                           </div>
-                      </div>
+                        );
+                      })()}
                   </div>
               )}
 
               {/* Strong CTA for Styling Inspiration (NEW) */}
               <div className="mb-12">
                   <button 
-                    onClick={() => navigate(`/styling/${product.id}`)}
+                    onClick={() => navigate(`/${language}/styling/${product.id}`)}
                     className="w-full group relative overflow-hidden rounded-2xl bg-[#2A2A2A] text-[#E8E0D9] p-6 flex items-center justify-between shadow-xl hover:shadow-2xl transition-all duration-300"
                   >
                       {/* Animated Background Effect */}
@@ -314,13 +537,29 @@ export const ProductDetail: React.FC = () => {
               {/* Actions */}
               <div className="flex gap-4 sticky bottom-0 bg-[#E8E0D9]/90 backdrop-blur-md py-4 -mx-4 px-4 lg:static lg:bg-transparent lg:p-0 z-10">
                  <button 
-                    onClick={() => addToCart({ ...product })}
+                    onClick={() => addToCart({ ...product, selectedSize, selectedColor: selectedColor || undefined })}
                     className="flex-1 bg-zafting-text text-[#E8E0D9] py-5 rounded-full uppercase tracking-widest text-sm hover:scale-105 transition-transform flex items-center justify-center gap-3 shadow-xl"
                  >
                     {t('shop.btn.buy')} <ShoppingBag size={18} />
                  </button>
-                 <button className="w-16 h-16 border border-zafting-text/20 rounded-full flex items-center justify-center hover:bg-zafting-text hover:text-[#E8E0D9] transition-colors">
-                    <Star size={20} />
+                 <button
+                    type="button"
+                    onClick={handleShoppingListClick}
+                    disabled={loadingShoppingList}
+                    title={!isAuthenticated ? t('product.shopping_list.login_to_add') : inShoppingList ? t('product.shopping_list.remove') : t('product.shopping_list.add')}
+                    className={`w-16 h-16 border rounded-full flex items-center justify-center transition-colors shrink-0 ${
+                      inShoppingList
+                        ? 'bg-zafting-text text-[#E8E0D9] border-zafting-text'
+                        : 'border-zafting-text/20 hover:bg-zafting-text hover:text-[#E8E0D9]'
+                    } ${loadingShoppingList ? 'opacity-70' : ''}`}
+                 >
+                    {loadingShoppingList ? (
+                      <Loader2 size={20} className="animate-spin" />
+                    ) : inShoppingList ? (
+                      <ListMinus size={20} />
+                    ) : (
+                      <ListPlus size={20} />
+                    )}
                  </button>
               </div>
 
