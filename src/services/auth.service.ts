@@ -12,6 +12,8 @@ export interface AuthUser {
   role?: string;
   name?: string | null;
   lastName?: string | null;
+  job?: string | null;
+  nationalCode?: string | null;
 }
 
 export interface VerifyOtpResponse {

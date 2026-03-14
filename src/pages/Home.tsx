@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Hero } from '../components/features/Hero';
 import { ProductGrid } from '../components/features/ProductGrid';
-import { IntroSection } from '../components/features/IntroSection';
 import { ReviewsSection } from '../components/features/ReviewsSection';
 import { useCart } from '../contexts/CartContext';
 import { useLanguage } from '../contexts/LanguageContext';
@@ -15,7 +14,6 @@ export const Home: React.FC = () => {
   const navigate = useNavigate();
 
   const [featuredProducts, setFeaturedProducts] = useState<Product[]>([]);
-  const [introProducts, setIntroProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -23,18 +21,13 @@ export const Home: React.FC = () => {
     const load = async () => {
       setLoading(true);
       try {
-        const [featured, intro] = await Promise.all([
-          fetchProductList({ isFeatured: true, limit: 10 }),
-          fetchProductList({ showInIntro: true, limit: 20 }),
-        ]);
+        const featured = await fetchProductList({ isFeatured: true, limit: 10 });
         if (!cancelled) {
           setFeaturedProducts(featured);
-          setIntroProducts(intro);
         }
       } catch {
         if (!cancelled) {
           setFeaturedProducts([]);
-          setIntroProducts([]);
         }
       } finally {
         if (!cancelled) setLoading(false);
@@ -65,13 +58,6 @@ export const Home: React.FC = () => {
     <div className="animate-fade-in">
       {featuredProduct && (
         <Hero featuredProduct={featuredProduct} onAddToCart={addToCart} />
-      )}
-      {introProducts.length > 0 && (
-        <IntroSection
-          products={introProducts}
-          onProductClick={handleProductClick}
-          onAddToCart={addToCart}
-        />
       )}
       {otherFeaturedProducts.length > 0 && (
         <ProductGrid

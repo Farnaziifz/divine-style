@@ -64,7 +64,7 @@ export const StylistChat: React.FC = () => {
             {messages.length === 0 && (
                 <div className="text-center text-zafting-text/60 text-sm mt-10">
                     <p className="font-serif text-xl mb-2">{t('chat.welcome')}</p>
-                    <p>{t('chat.intro')}</p>
+                    <p className="font-sans">{t('chat.intro')}</p>
                 </div>
             )}
             {messages.map((msg, idx) => (
@@ -73,7 +73,7 @@ export const StylistChat: React.FC = () => {
                 className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
               >
                 <div
-                  className={`max-w-[80%] p-3 rounded-xl text-sm ${
+                  className={`font-sans max-w-[80%] p-3 rounded-xl text-sm ${
                     msg.role === 'user'
                       ? 'bg-zafting-text text-[#E8E0D9] rounded-be-none' // rounded-be is logical bottom-end (bottom-right in LTR, bottom-left in RTL)
                       : 'bg-white border border-zafting-text/10 text-zafting-text rounded-bs-none shadow-sm' // rounded-bs is logical bottom-start

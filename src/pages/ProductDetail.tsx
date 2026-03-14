@@ -372,9 +372,43 @@ export const ProductDetail: React.FC = () => {
               </div>
 
               {/* Description */}
-              <p className="font-serif text-xl leading-relaxed opacity-80 mb-10 border-l-2 border-zafting-text/20 ps-4">
+              <p className="font-serif text-xl leading-relaxed opacity-80 mb-8 border-l-2 border-zafting-text/20 ps-4">
                 {product.description}
               </p>
+
+              {/* Primary actions: Buy + Add to list — right after description for better UX */}
+              <div className="flex gap-3 mb-10">
+                <button
+                  type="button"
+                  onClick={() => addToCart({ ...product, selectedSize, selectedColor: selectedColor || undefined })}
+                  className="flex-1 bg-zafting-text text-zafting-bg py-4 px-6 rounded-full uppercase tracking-widest text-sm font-medium hover:opacity-95 transition-opacity flex items-center justify-center gap-2 shadow-lg"
+                >
+                  <ShoppingBag size={20} />
+                  {t('shop.btn.buy')}
+                </button>
+                <button
+                  type="button"
+                  onClick={handleShoppingListClick}
+                  disabled={loadingShoppingList}
+                  title={!isAuthenticated ? t('product.shopping_list.login_to_add') : inShoppingList ? t('product.shopping_list.remove') : t('product.shopping_list.add')}
+                  className={`shrink-0 flex items-center gap-2 py-4 px-5 rounded-full border-2 text-sm font-medium transition-colors ${
+                    inShoppingList
+                      ? 'bg-zafting-text text-zafting-bg border-zafting-text'
+                      : 'border-zafting-text/30 text-zafting-text hover:bg-zafting-text/10 hover:border-zafting-text'
+                  } ${loadingShoppingList ? 'opacity-70' : ''}`}
+                >
+                  {loadingShoppingList ? (
+                    <Loader2 size={20} className="animate-spin" />
+                  ) : inShoppingList ? (
+                    <ListMinus size={20} />
+                  ) : (
+                    <ListPlus size={20} />
+                  )}
+                  <span className="hidden sm:inline">
+                    {inShoppingList ? t('product.shopping_list.remove') : t('product.shopping_list.add')}
+                  </span>
+                </button>
+              </div>
 
               <hr className="border-zafting-text/10 mb-10" />
 
@@ -533,35 +567,6 @@ export const ProductDetail: React.FC = () => {
               {/* Reviews Section */}
               <hr className="border-zafting-text/10 mb-10" />
               <ReviewsSection initialReviews={product.reviews || []} />
-
-              {/* Actions */}
-              <div className="flex gap-4 sticky bottom-0 bg-[#E8E0D9]/90 backdrop-blur-md py-4 -mx-4 px-4 lg:static lg:bg-transparent lg:p-0 z-10">
-                 <button 
-                    onClick={() => addToCart({ ...product, selectedSize, selectedColor: selectedColor || undefined })}
-                    className="flex-1 bg-zafting-text text-[#E8E0D9] py-5 rounded-full uppercase tracking-widest text-sm hover:scale-105 transition-transform flex items-center justify-center gap-3 shadow-xl"
-                 >
-                    {t('shop.btn.buy')} <ShoppingBag size={18} />
-                 </button>
-                 <button
-                    type="button"
-                    onClick={handleShoppingListClick}
-                    disabled={loadingShoppingList}
-                    title={!isAuthenticated ? t('product.shopping_list.login_to_add') : inShoppingList ? t('product.shopping_list.remove') : t('product.shopping_list.add')}
-                    className={`w-16 h-16 border rounded-full flex items-center justify-center transition-colors shrink-0 ${
-                      inShoppingList
-                        ? 'bg-zafting-text text-[#E8E0D9] border-zafting-text'
-                        : 'border-zafting-text/20 hover:bg-zafting-text hover:text-[#E8E0D9]'
-                    } ${loadingShoppingList ? 'opacity-70' : ''}`}
-                 >
-                    {loadingShoppingList ? (
-                      <Loader2 size={20} className="animate-spin" />
-                    ) : inShoppingList ? (
-                      <ListMinus size={20} />
-                    ) : (
-                      <ListPlus size={20} />
-                    )}
-                 </button>
-              </div>
 
             </div>
           </div>

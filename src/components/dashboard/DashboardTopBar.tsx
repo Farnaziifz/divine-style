@@ -27,12 +27,12 @@ export const DashboardTopBar: React.FC<DashboardTopBarProps> = ({ onMenuClick })
         </button>
         <Link
           to={`/${lang}`}
-          className="text-lg font-semibold text-zafting-text hover:opacity-80 tracking-tight"
+          className="font-serif text-lg font-semibold text-zafting-text hover:opacity-80 tracking-tight"
         >
           {t('nav.title')}
         </Link>
         <span className="text-zafting-text/40 hidden sm:inline">/</span>
-        <span className="text-sm text-zafting-text/70 hidden sm:inline">
+        <span className="font-sans text-sm text-zafting-text/70 hidden sm:inline">
           {language === 'fa' ? 'حساب من' : 'My Account'}
         </span>
       </div>
@@ -41,13 +41,13 @@ export const DashboardTopBar: React.FC<DashboardTopBarProps> = ({ onMenuClick })
         <button
           type="button"
           onClick={() => setLanguage(language === 'en' ? 'fa' : 'en')}
-          className="p-2 rounded-lg text-zafting-text/70 hover:bg-zafting-text/5 text-xs font-medium uppercase"
+          className="font-sans p-2 rounded-lg text-zafting-text/70 hover:bg-zafting-text/5 text-xs font-medium uppercase"
         >
           <Globe size={18} />
         </button>
         <Link
           to={`/${lang}/shop`}
-          className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium text-zafting-text hover:bg-zafting-text/5"
+          className="font-sans flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium text-zafting-text hover:bg-zafting-text/5"
         >
           {language === 'fa' ? 'فروشگاه' : 'Shop'}
           <ArrowRight size={16} className={language === 'fa' ? 'rotate-180' : ''} />

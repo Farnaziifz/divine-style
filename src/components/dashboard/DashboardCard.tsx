@@ -26,8 +26,8 @@ export const DashboardCardHeader: React.FC<DashboardCardHeaderProps> = ({
 }) => (
   <div className="px-6 py-5 border-b border-zafting-text/5 flex items-start justify-between gap-4">
     <div>
-      <h2 className="text-lg font-semibold text-zafting-text">{title}</h2>
-      {subtitle && <p className="text-sm text-zafting-text/60 mt-0.5">{subtitle}</p>}
+      <h2 className="font-serif text-lg font-semibold text-zafting-text">{title}</h2>
+      {subtitle && <p className="font-sans text-sm text-zafting-text/60 mt-0.5">{subtitle}</p>}
     </div>
     {action && <div className="shrink-0">{action}</div>}
   </div>

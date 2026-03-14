@@ -39,13 +39,13 @@ export const DashboardLayout: React.FC = () => {
       <div className="p-6 border-b border-zafting-text/10">
         <Link
           to={`/${lang}/shop`}
-          className="text-xl font-semibold tracking-tight text-zafting-text hover:opacity-80"
+          className="font-serif text-xl font-semibold tracking-tight text-zafting-text hover:opacity-80"
         >
           {t('nav.title')}
         </Link>
-        <p className="text-xs text-zafting-text/50 mt-1 uppercase tracking-widest">
-          {language === 'fa' ? 'حساب من' : 'My Account'}
-        </p>
+<p className="font-sans text-xs text-zafting-text/50 mt-1 uppercase tracking-widest">
+            {language === 'fa' ? 'حساب من' : 'My Account'}
+          </p>
       </div>
 
       <nav className="flex-1 overflow-y-auto p-4">
@@ -57,7 +57,7 @@ export const DashboardLayout: React.FC = () => {
                 end={to === 'profile'}
                 onClick={() => setSidebarOpen(false)}
                 className={({ isActive }) =>
-                  `flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors ${
+                  `font-sans flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors ${
                     isActive
                       ? 'bg-zafting-text text-white shadow-md'
                       : 'text-zafting-text/80 hover:bg-zafting-text/5 hover:text-zafting-text'
@@ -74,15 +74,15 @@ export const DashboardLayout: React.FC = () => {
 
       <div className="p-4 border-t border-zafting-text/10 space-y-2">
         <div className="px-4 py-3 rounded-lg bg-zafting-text/5">
-          <p className="text-sm font-medium text-zafting-text truncate">{displayName}</p>
+          <p className="font-serif text-sm font-medium text-zafting-text truncate">{displayName}</p>
           {user?.mobile && (
-            <p className="text-xs text-zafting-text/50 dir-ltr mt-0.5">{user.mobile}</p>
+            <p className="font-sans text-xs text-zafting-text/50 dir-ltr mt-0.5 font-mono">{user.mobile}</p>
           )}
         </div>
         <button
           type="button"
           onClick={handleLogout}
-          className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-lg text-sm font-medium text-red-600 hover:bg-red-50 transition-colors"
+          className="font-sans w-full flex items-center justify-center gap-2 px-4 py-3 rounded-lg text-sm font-medium text-red-600 hover:bg-red-50 transition-colors"
         >
           <LogOut size={18} />
           {t('profile.logout')}

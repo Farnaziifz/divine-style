@@ -33,7 +33,7 @@ export const ReviewsSection: React.FC<ReviewsSectionProps> = ({ initialReviews =
   };
 
   return (
-    <div className="mt-16 mb-24">
+    <section className="mt-16 mb-24 px-6 max-w-7xl mx-auto">
       <div className="flex justify-between items-center mb-8">
         <h3 className="font-serif text-2xl md:text-3xl text-zafting-text">
           {t('reviews.title')} <span className="text-lg opacity-50 font-sans">({reviews.length})</span>
@@ -41,7 +41,7 @@ export const ReviewsSection: React.FC<ReviewsSectionProps> = ({ initialReviews =
         
         <button 
           onClick={() => setIsWriting(!isWriting)}
-          className="flex items-center gap-2 text-sm border-b border-zafting-text pb-1 hover:text-zafting-accent transition-colors"
+          className="font-sans flex items-center gap-2 text-sm border-b border-zafting-text pb-1 hover:text-zafting-accent transition-colors"
         >
            <PenLine size={16} /> {t('reviews.write')}
         </button>
@@ -51,7 +51,7 @@ export const ReviewsSection: React.FC<ReviewsSectionProps> = ({ initialReviews =
       {isWriting && (
         <form onSubmit={handleSubmit} className="bg-white/40 p-6 rounded-2xl mb-8 animate-fade-in border border-white">
            <div className="mb-4">
-               <label className="block text-xs uppercase tracking-widest mb-2 font-bold opacity-60">{t('reviews.stars')}</label>
+               <label className="font-sans block text-xs uppercase tracking-widest mb-2 font-bold opacity-60">{t('reviews.stars')}</label>
                <div className="flex gap-1 text-yellow-500 cursor-pointer">
                    {[1, 2, 3, 4, 5].map((star) => (
                        <Star 
@@ -69,21 +69,21 @@ export const ReviewsSection: React.FC<ReviewsSectionProps> = ({ initialReviews =
              value={newComment}
              onChange={(e) => setNewComment(e.target.value)}
              placeholder={t('reviews.placeholder')}
-             className="w-full bg-white/50 border border-white rounded-xl p-4 text-sm focus:outline-none focus:ring-1 focus:ring-zafting-text mb-4 min-h-[100px]"
+             className="font-sans w-full bg-white/50 border border-white rounded-xl p-4 text-sm focus:outline-none focus:ring-1 focus:ring-zafting-text mb-4 min-h-[100px]"
            />
            
            <div className="flex justify-end gap-3">
                <button 
                  type="button" 
                  onClick={() => setIsWriting(false)}
-                 className="px-4 py-2 text-xs uppercase tracking-widest opacity-60 hover:opacity-100"
+                 className="font-sans px-4 py-2 text-xs uppercase tracking-widest opacity-60 hover:opacity-100"
                >
                    {t('reviews.cancel')}
                </button>
                <button 
                  type="submit"
                  disabled={!newComment.trim()}
-                 className="bg-zafting-text text-[#E8E0D9] px-6 py-2 rounded-full text-xs uppercase tracking-widest hover:scale-105 transition-transform disabled:opacity-50 disabled:scale-100"
+                 className="font-sans bg-zafting-text text-zafting-bg px-6 py-2 rounded-full text-xs uppercase tracking-widest hover:scale-105 transition-transform disabled:opacity-50 disabled:scale-100"
                >
                    {t('reviews.submit')}
                </button>
@@ -111,11 +111,11 @@ export const ReviewsSection: React.FC<ReviewsSectionProps> = ({ initialReviews =
                       <h4 className="font-serif text-lg leading-none">{review.userName}</h4>
                       <div className="flex items-center gap-2 mt-1">
                           {review.role === 'Verified Buyer' && (
-                              <span className="flex items-center gap-1 text-[10px] uppercase tracking-wider text-green-700 bg-green-100 px-2 py-0.5 rounded-full">
+                              <span className="font-sans flex items-center gap-1 text-[10px] uppercase tracking-wider text-green-700 bg-green-100 px-2 py-0.5 rounded-full">
                                   <CheckCircle size={10} /> {t('reviews.role.verified')}
                               </span>
                           )}
-                          <span className="text-xs opacity-40">{review.date}</span>
+                          <span className="font-sans text-xs opacity-40">{review.date}</span>
                       </div>
                   </div>
                </div>
@@ -127,12 +127,12 @@ export const ReviewsSection: React.FC<ReviewsSectionProps> = ({ initialReviews =
                </div>
             </div>
 
-            <p className="text-zafting-text/80 leading-relaxed text-sm">
+            <p className="font-sans text-zafting-text/80 leading-relaxed text-sm">
                 "{review.comment}"
             </p>
           </div>
         ))}
       </div>
-    </div>
+    </section>
   );
 };
