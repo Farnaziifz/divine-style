@@ -1,11 +1,11 @@
 import React from 'react';
-import { X, ArrowRight, ArrowLeft } from 'lucide-react';
+import { X, ArrowRight, ArrowLeft, Plus, Minus } from 'lucide-react';
 import { useCart } from '../../contexts/CartContext';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { formatPriceToman } from '../../utils/format';
 
 export const CartSidebar: React.FC = () => {
-  const { cart, isCartOpen, setIsCartOpen, removeFromCart, cartTotal } = useCart();
+  const { cart, isCartOpen, setIsCartOpen, removeFromCart, updateCartItemQuantity, cartTotal } = useCart();
   const { t, direction } = useLanguage();
 
   if (!isCartOpen) return null;
@@ -39,7 +39,27 @@ export const CartSidebar: React.FC = () => {
                   </p>
                   <div className="flex justify-between items-center mt-2">
                     <span className="font-sans font-medium">{formatPriceToman(item.discountPrice || item.price)}</span>
-                    <span className="font-sans text-xs opacity-50">{t('cart.qty')}: {item.quantity}</span>
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => updateCartItemQuantity(item.id, item.quantity - 1)}
+                        className="w-8 h-8 flex items-center justify-center rounded-full border border-zafting-text/20 hover:bg-zafting-text/5 transition-colors"
+                        aria-label="decrease-qty"
+                      >
+                        <Minus size={14} />
+                      </button>
+                      <span className="font-sans text-xs opacity-60 min-w-10 text-center">
+                        {t('cart.qty')}: {item.quantity}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => updateCartItemQuantity(item.id, item.quantity + 1)}
+                        className="w-8 h-8 flex items-center justify-center rounded-full border border-zafting-text/20 hover:bg-zafting-text/5 transition-colors"
+                        aria-label="increase-qty"
+                      >
+                        <Plus size={14} />
+                      </button>
+                    </div>
                   </div>
                 </div>
                 <button 

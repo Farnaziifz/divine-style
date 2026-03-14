@@ -31,32 +31,32 @@ const ProtectedDashboard = () => {
 const AppContent = () => {
   return (
     <LanguageProvider>
-      <CartProvider>
-        <AuthProvider>
-            <Routes>
-              <Route path="/" element={<RootRedirect />} />
-              {/* Dashboard: separate layout with its own top bar, no main site Navbar */}
-              <Route path="/:lang/dashboard" element={<ProtectedDashboard />}>
-                <Route element={<DashboardLayout />}>
-                  <Route index element={<Navigate to="profile" replace />} />
-                  <Route path="profile" element={<Profile />} />
-                  <Route path="orders" element={<DashboardOrders />} />
-                  <Route path="favorites" element={<DashboardFavorites />} />
-                  <Route path="cart" element={<DashboardCart />} />
-                </Route>
+      <AuthProvider>
+        <CartProvider>
+          <Routes>
+            <Route path="/" element={<RootRedirect />} />
+            {/* Dashboard: separate layout with its own top bar, no main site Navbar */}
+            <Route path="/:lang/dashboard" element={<ProtectedDashboard />}>
+              <Route element={<DashboardLayout />}>
+                <Route index element={<Navigate to="profile" replace />} />
+                <Route path="profile" element={<Profile />} />
+                <Route path="orders" element={<DashboardOrders />} />
+                <Route path="favorites" element={<DashboardFavorites />} />
+                <Route path="cart" element={<DashboardCart />} />
               </Route>
-              {/* Main site: Navbar + Cart + StylistChat */}
-              <Route path="/:lang" element={<MainLayout />}>
-                <Route index element={<Home />} />
-                <Route path="shop" element={<Shop />} />
-                <Route path="category/:id" element={<Category />} />
-                <Route path="product/:id" element={<ProductDetail />} />
-                <Route path="styling/:id" element={<StyleInspiration />} />
-                <Route path="auth" element={<Auth />} />
-              </Route>
-            </Routes>
-        </AuthProvider>
-      </CartProvider>
+            </Route>
+            {/* Main site: Navbar + Cart + StylistChat */}
+            <Route path="/:lang" element={<MainLayout />}>
+              <Route index element={<Home />} />
+              <Route path="shop" element={<Shop />} />
+              <Route path="category/:id" element={<Category />} />
+              <Route path="product/:id" element={<ProductDetail />} />
+              <Route path="styling/:id" element={<StyleInspiration />} />
+              <Route path="auth" element={<Auth />} />
+            </Route>
+          </Routes>
+        </CartProvider>
+      </AuthProvider>
     </LanguageProvider>
   );
 };
