@@ -162,7 +162,7 @@ const translations: Record<Language, Record<string, string>> = {
     'cart.title': 'سبد خرید',
     'cart.empty': 'سبد خرید شما خالی است.',
     'cart.total': 'جمع کل',
-    'cart.checkout': 'تسویه حساب',
+    'cart.checkout': 'مشاهده و نهایی کردن سبد خرید',
     'cart.remove': 'حذف',
     'cart.qty': 'تعداد',
     'chat.trigger': 'مشاور استایل',

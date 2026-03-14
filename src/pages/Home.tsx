@@ -14,6 +14,8 @@ export const Home: React.FC = () => {
   const navigate = useNavigate();
 
   const [featuredProducts, setFeaturedProducts] = useState<Product[]>([]);
+  const [introProducts, setIntroProducts] = useState<Product[]>([]);
+  const [allProducts, setAllProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -21,13 +23,21 @@ export const Home: React.FC = () => {
     const load = async () => {
       setLoading(true);
       try {
-        const featured = await fetchProductList({ isFeatured: true, limit: 10 });
+        const [featured, intro, all] = await Promise.all([
+          fetchProductList({ isFeatured: true, limit: 10 }),
+          fetchProductList({ showInIntro: true, limit: 10 }),
+          fetchProductList({ limit: 12 }),
+        ]);
         if (!cancelled) {
           setFeaturedProducts(featured);
+          setIntroProducts(intro);
+          setAllProducts(all);
         }
       } catch {
         if (!cancelled) {
           setFeaturedProducts([]);
+          setIntroProducts([]);
+          setAllProducts([]);
         }
       } finally {
         if (!cancelled) setLoading(false);
@@ -37,10 +47,18 @@ export const Home: React.FC = () => {
     return () => { cancelled = true; };
   }, []);
 
-  const featuredProduct = featuredProducts[0] ?? null;
-  const otherFeaturedProducts = featuredProduct
-    ? featuredProducts.slice(1)
-    : featuredProducts;
+  const heroProducts =
+    introProducts.length > 0
+      ? introProducts
+      : featuredProducts.length > 0
+        ? featuredProducts
+        : allProducts;
+  const heroFirst = heroProducts[0] ?? null;
+  const heroIds = new Set(heroProducts.map((p) => p.id));
+  const gridProducts =
+    featuredProducts.length > 0
+      ? featuredProducts
+      : allProducts.filter((p) => !heroIds.has(p.id));
 
   const handleProductClick = (product: Product) => {
     navigate(`/${language}/product/${product.id}`);
@@ -56,18 +74,18 @@ export const Home: React.FC = () => {
 
   return (
     <div className="animate-fade-in">
-      {featuredProduct && (
-        <Hero featuredProduct={featuredProduct} onAddToCart={addToCart} />
+      {heroProducts.length > 0 && (
+        <Hero products={heroProducts} onProductClick={handleProductClick} />
       )}
-      {otherFeaturedProducts.length > 0 && (
+      {gridProducts.length > 0 && (
         <ProductGrid
-          products={otherFeaturedProducts}
+          products={gridProducts}
           onAddToCart={addToCart}
           onProductClick={handleProductClick}
         />
       )}
-      {featuredProduct && (
-        <ReviewsSection initialReviews={featuredProduct.reviews || []} />
+      {heroFirst && (
+        <ReviewsSection initialReviews={heroFirst.reviews || []} />
       )}
     </div>
   );
