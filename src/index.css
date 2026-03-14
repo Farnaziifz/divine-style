@@ -37,8 +37,10 @@ body {
   font-family: var(--font-sans);
 }
 
-body[dir="rtl"] {
-  font-family: "IRANSans", "Vazirmatn", sans-serif;
+html[dir="rtl"] body {
+  --font-sans: var(--font-persian);
+  --font-serif: var(--font-persian);
+  font-family: var(--font-persian);
 }
 
 /* Custom utility for the outline text effect seen in the image */
