@@ -1,12 +1,14 @@
 import React from 'react';
 import { X, ArrowRight, ArrowLeft, Plus, Minus } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { useCart } from '../../contexts/CartContext';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { formatPriceToman } from '../../utils/format';
 
 export const CartSidebar: React.FC = () => {
   const { cart, isCartOpen, setIsCartOpen, removeFromCart, updateCartItemQuantity, cartTotal } = useCart();
-  const { t, direction } = useLanguage();
+  const { t, direction, language } = useLanguage();
+  const navigate = useNavigate();
 
   if (!isCartOpen) return null;
 
@@ -80,7 +82,13 @@ export const CartSidebar: React.FC = () => {
                     <span>{t('cart.total')}</span>
                     <span>{formatPriceToman(cartTotal)}</span>
                 </div>
-                <button className="font-sans w-full bg-zafting-text text-zafting-bg py-4 rounded-full font-bold uppercase tracking-widest hover:bg-zafting-accent transition-colors flex items-center justify-center gap-2">
+                <button
+                  onClick={() => {
+                    setIsCartOpen(false);
+                    navigate(`/${language}/checkout`);
+                  }}
+                  className="font-sans w-full bg-zafting-text text-zafting-bg py-4 rounded-full font-bold uppercase tracking-widest hover:bg-zafting-accent transition-colors flex items-center justify-center gap-2"
+                >
                     {t('cart.checkout')}
                     {direction === 'rtl' ? <ArrowLeft size={18} /> : <ArrowRight size={18} />}
                 </button>

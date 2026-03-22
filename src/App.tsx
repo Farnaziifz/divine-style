@@ -12,9 +12,11 @@ import { ProductDetail } from './pages/ProductDetail';
 import { StyleInspiration } from './pages/StyleInspiration';
 import { Auth } from './pages/Auth';
 import { Profile } from './pages/Profile';
+import { Checkout } from './pages/Checkout';
 import { DashboardOrders } from './pages/dashboard/DashboardOrders';
 import { DashboardFavorites } from './pages/dashboard/DashboardFavorites';
 import { DashboardCart } from './pages/dashboard/DashboardCart';
+import { DashboardAddresses } from './pages/dashboard/DashboardAddresses';
 
 const RootRedirect = () => <Navigate to="/fa" replace />;
 
@@ -40,6 +42,7 @@ const AppContent = () => {
               <Route element={<DashboardLayout />}>
                 <Route index element={<Navigate to="profile" replace />} />
                 <Route path="profile" element={<Profile />} />
+                <Route path="addresses" element={<DashboardAddresses />} />
                 <Route path="orders" element={<DashboardOrders />} />
                 <Route path="favorites" element={<DashboardFavorites />} />
                 <Route path="cart" element={<DashboardCart />} />
@@ -53,6 +56,7 @@ const AppContent = () => {
               <Route path="product/:id" element={<ProductDetail />} />
               <Route path="styling/:id" element={<StyleInspiration />} />
               <Route path="auth" element={<Auth />} />
+              <Route path="checkout" element={<Checkout />} />
             </Route>
           </Routes>
         </CartProvider>

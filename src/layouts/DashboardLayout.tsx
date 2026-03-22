@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Outlet, NavLink, useParams, useNavigate } from 'react-router-dom';
-import { User, Package, Heart, ShoppingBag, LogOut, Menu } from 'lucide-react';
+import { User, Package, Heart, ShoppingBag, LogOut, Menu, MapPin } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useAuth } from '../contexts/AuthContext';
 import { Link } from 'react-router-dom';
@@ -8,6 +8,7 @@ import { DashboardTopBar } from '../components/dashboard/DashboardTopBar';
 
 const navItems = [
   { to: 'profile', key: 'dashboard.menu.profile', icon: User },
+  { to: 'addresses', key: 'dashboard.menu.addresses', icon: MapPin },
   { to: 'orders', key: 'dashboard.menu.orders', icon: Package },
   { to: 'favorites', key: 'dashboard.menu.favorites', icon: Heart },
   { to: 'cart', key: 'dashboard.menu.cart', icon: ShoppingBag },
