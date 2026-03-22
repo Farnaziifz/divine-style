@@ -16,6 +16,13 @@ type CheckoutPreview = {
   address: any;
 };
 
+type CheckoutResponse = {
+  orderId: string;
+  payableAmount: number;
+  paymentStatus: 'PAID' | 'PENDING' | 'FAILED';
+  paymentUrl: string | null;
+};
+
 export const Checkout: React.FC = () => {
   const { language, t } = useLanguage();
   const navigate = useNavigate();
@@ -104,9 +111,17 @@ export const Checkout: React.FC = () => {
         addressId: selectedAddressId,
         ...(discountCode.trim() ? { discountCode: discountCode.trim() } : {}),
       };
-      const { data } = await api.post('/basket/checkout', payload);
+      const { data } = await api.post<CheckoutResponse>('/basket/checkout', payload);
       clearCart();
-      navigate(`/${language}/dashboard/orders?orderId=${data.orderId}`);
+      if (data.paymentUrl) {
+        window.location.href = data.paymentUrl;
+        return;
+      }
+      if (data.paymentStatus === 'PAID') {
+        navigate(`/${language}/payment/success?orderId=${data.orderId}`);
+        return;
+      }
+      navigate(`/${language}/payment/failed?orderId=${data.orderId}`);
     } catch (e: any) {
       setError(e?.response?.data?.message ?? (language === 'fa' ? 'خطا در ثبت سفارش' : 'Checkout failed'));
     } finally {

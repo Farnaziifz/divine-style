@@ -13,6 +13,8 @@ import { StyleInspiration } from './pages/StyleInspiration';
 import { Auth } from './pages/Auth';
 import { Profile } from './pages/Profile';
 import { Checkout } from './pages/Checkout';
+import { PaymentSuccess } from './pages/PaymentSuccess';
+import { PaymentFailed } from './pages/PaymentFailed';
 import { DashboardOrders } from './pages/dashboard/DashboardOrders';
 import { DashboardFavorites } from './pages/dashboard/DashboardFavorites';
 import { DashboardCart } from './pages/dashboard/DashboardCart';
@@ -57,6 +59,8 @@ const AppContent = () => {
               <Route path="styling/:id" element={<StyleInspiration />} />
               <Route path="auth" element={<Auth />} />
               <Route path="checkout" element={<Checkout />} />
+              <Route path="payment/success" element={<PaymentSuccess />} />
+              <Route path="payment/failed" element={<PaymentFailed />} />
             </Route>
           </Routes>
         </CartProvider>
