@@ -6,6 +6,16 @@ export interface ProfileUpdateDto {
   lastName?: string;
   job?: string;
   nationalCode?: string;
+  addresses?: Array<{
+    id?: string;
+    province: string;
+    city: string;
+    address: string;
+    plaque?: string;
+    unit?: string;
+    postalCode?: string;
+    isDefault?: boolean;
+  }>;
 }
 
 export const userService = {

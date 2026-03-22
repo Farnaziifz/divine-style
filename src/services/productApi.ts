@@ -1,5 +1,5 @@
 /**
- * Product API for divine-style frontend.
+ * Product API for divine-style-style frontend.
  * Fetches product by ID and maps API response to UI Product type.
  */
 
@@ -59,7 +59,7 @@ function num(val: unknown): number {
 }
 
 /**
- * Map API product to divine-style Product with full details:
+ * Map API product to divine-style-style Product with full details:
  * gallery, sizes from variants, price/discount from first variant,
  * optional fabric/specs from variant specifications.
  */

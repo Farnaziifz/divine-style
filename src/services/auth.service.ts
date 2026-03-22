@@ -14,6 +14,16 @@ export interface AuthUser {
   lastName?: string | null;
   job?: string | null;
   nationalCode?: string | null;
+  addresses?: Array<{
+    id?: string;
+    province: string;
+    city: string;
+    address: string;
+    plaque?: string;
+    unit?: string;
+    postalCode?: string;
+    isDefault?: boolean;
+  }> | null;
 }
 
 export interface VerifyOtpResponse {
