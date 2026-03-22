@@ -5,7 +5,7 @@ import { useLanguage } from '../contexts/LanguageContext';
 export const PaymentFailed: React.FC = () => {
   const { t, language } = useLanguage();
   const [params] = useSearchParams();
-  const orderId = params.get('orderId');
+  const orderCode = params.get('orderCode') || params.get('orderId');
 
   return (
     <div className="px-6 max-w-3xl mx-auto pt-28 pb-20 animate-fade-in">
@@ -15,9 +15,9 @@ export const PaymentFailed: React.FC = () => {
       <p className="font-sans text-zafting-text/70 mt-4">
         {t('payment.failed.subtitle')}
       </p>
-      {orderId ? (
+      {orderCode ? (
         <p className="font-sans text-sm text-zafting-text/60 mt-4 dir-ltr">
-          {t('payment.orderId')}: {orderId}
+          {t('payment.orderCode')}: {orderCode}
         </p>
       ) : null}
       <div className="flex gap-3 mt-8">
@@ -37,4 +37,3 @@ export const PaymentFailed: React.FC = () => {
     </div>
   );
 };
-

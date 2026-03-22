@@ -18,6 +18,7 @@ type CheckoutPreview = {
 
 type CheckoutResponse = {
   orderId: string;
+  orderCode: string;
   payableAmount: number;
   paymentStatus: 'PAID' | 'PENDING' | 'FAILED';
   paymentUrl: string | null;
@@ -118,10 +119,10 @@ export const Checkout: React.FC = () => {
         return;
       }
       if (data.paymentStatus === 'PAID') {
-        navigate(`/${language}/payment/success?orderId=${data.orderId}`);
+        navigate(`/${language}/payment/success?orderCode=${data.orderCode}`);
         return;
       }
-      navigate(`/${language}/payment/failed?orderId=${data.orderId}`);
+      navigate(`/${language}/payment/failed?orderCode=${data.orderCode}`);
     } catch (e: any) {
       setError(e?.response?.data?.message ?? (language === 'fa' ? 'خطا در ثبت سفارش' : 'Checkout failed'));
     } finally {

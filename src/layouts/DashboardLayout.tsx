@@ -1,18 +1,10 @@
 import React, { useState } from 'react';
-import { Outlet, NavLink, useParams, useNavigate } from 'react-router-dom';
-import { User, Package, Heart, ShoppingBag, LogOut, Menu, MapPin } from 'lucide-react';
+import { Outlet, NavLink, useLocation, useParams, useNavigate } from 'react-router-dom';
+import { User, Package, Heart, ShoppingBag, LogOut, Menu, MapPin, ArrowLeft, ArrowRight } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useAuth } from '../contexts/AuthContext';
 import { Link } from 'react-router-dom';
 import { DashboardTopBar } from '../components/dashboard/DashboardTopBar';
-
-const navItems = [
-  { to: 'profile', key: 'dashboard.menu.profile', icon: User },
-  { to: 'addresses', key: 'dashboard.menu.addresses', icon: MapPin },
-  { to: 'orders', key: 'dashboard.menu.orders', icon: Package },
-  { to: 'favorites', key: 'dashboard.menu.favorites', icon: Heart },
-  { to: 'cart', key: 'dashboard.menu.cart', icon: ShoppingBag },
-];
 
 const SIDEBAR_WIDTH = '18rem'; // w-72
 
@@ -21,9 +13,19 @@ export const DashboardLayout: React.FC = () => {
   const { lang } = useParams<{ lang: string }>();
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const base = `/${lang || 'fa'}/dashboard`;
   const isRtl = language === 'fa';
+  const isInAdminArea = location.pathname.includes('/dashboard/admin/');
+
+  const navItems = [
+    { to: 'profile', key: 'dashboard.menu.profile', icon: User },
+    { to: 'addresses', key: 'dashboard.menu.addresses', icon: MapPin },
+    { to: 'orders', key: 'dashboard.menu.orders', icon: Package },
+    { to: 'favorites', key: 'dashboard.menu.favorites', icon: Heart },
+    { to: 'cart', key: 'dashboard.menu.cart', icon: ShoppingBag },
+  ];
 
   const handleLogout = () => {
     logout();
@@ -74,6 +76,19 @@ export const DashboardLayout: React.FC = () => {
       </nav>
 
       <div className="p-4 border-t border-zafting-text/10 space-y-2">
+        {isInAdminArea && (
+          <button
+            type="button"
+            onClick={() => {
+              setSidebarOpen(false);
+              navigate(`${base}/orders`);
+            }}
+            className="font-sans w-full flex items-center justify-center gap-2 px-4 py-3 rounded-lg text-sm font-medium border border-zafting-text/15 hover:bg-zafting-text/5 transition-colors"
+          >
+            {isRtl ? <ArrowRight size={18} /> : <ArrowLeft size={18} />}
+            {t('dashboard.admin.exit')}
+          </button>
+        )}
         <div className="px-4 py-3 rounded-lg bg-zafting-text/5">
           <p className="font-serif text-sm font-medium text-zafting-text truncate">{displayName}</p>
           {user?.mobile && (

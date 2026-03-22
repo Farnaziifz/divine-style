@@ -19,6 +19,7 @@ import { DashboardOrders } from './pages/dashboard/DashboardOrders';
 import { DashboardFavorites } from './pages/dashboard/DashboardFavorites';
 import { DashboardCart } from './pages/dashboard/DashboardCart';
 import { DashboardAddresses } from './pages/dashboard/DashboardAddresses';
+import { DashboardOrderDetail } from './pages/dashboard/DashboardOrderDetail';
 
 const RootRedirect = () => <Navigate to="/fa" replace />;
 
@@ -46,6 +47,7 @@ const AppContent = () => {
                 <Route path="profile" element={<Profile />} />
                 <Route path="addresses" element={<DashboardAddresses />} />
                 <Route path="orders" element={<DashboardOrders />} />
+                <Route path="orders/:orderCode" element={<DashboardOrderDetail />} />
                 <Route path="favorites" element={<DashboardFavorites />} />
                 <Route path="cart" element={<DashboardCart />} />
               </Route>
