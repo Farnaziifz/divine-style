@@ -2,7 +2,7 @@ import React from 'react';
 import { Outlet } from 'react-router-dom';
 import { Navbar } from '../components/layout/Navbar';
 import { CartSidebar } from '../components/features/CartSidebar';
-import { StylistChat } from '../components/features/StylistChat';
+import { DirectChatWidget } from '../components/features/DirectChatWidget';
 
 export const MainLayout: React.FC = () => {
   return (
@@ -12,7 +12,7 @@ export const MainLayout: React.FC = () => {
         <Outlet />
       </main>
       <CartSidebar />
-      <StylistChat />
+      <DirectChatWidget />
     </div>
   );
 };

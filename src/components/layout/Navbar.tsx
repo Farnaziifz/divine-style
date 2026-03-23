@@ -33,6 +33,7 @@ export const Navbar: React.FC = () => {
     }
   };
 
+
   const menuItems = [
     { key: 'nav.menu.shop', href: `/${language}/shop` },
     { key: 'nav.menu.collections', href: `/${language}` },

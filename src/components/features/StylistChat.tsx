@@ -39,7 +39,7 @@ export const StylistChat: React.FC = () => {
       {/* Trigger Button */}
       <button
         onClick={() => setIsOpen(true)}
-        className={`fixed bottom-8 end-8 z-50 bg-zafting-text text-[#E8E0D9] p-4 rounded-full shadow-xl hover:scale-105 transition-transform duration-300 ${isOpen ? 'hidden' : 'flex'} items-center gap-2`}
+        className={`fixed bottom-8 right-8 z-40 bg-zafting-text text-[#E8E0D9] p-4 rounded-full shadow-xl hover:scale-105 transition-transform duration-300 ${isOpen ? 'hidden' : 'flex'} items-center gap-2`}
       >
         <Sparkles size={20} />
         <span className="font-serif italic pe-1">{t('chat.trigger')}</span>
@@ -47,7 +47,7 @@ export const StylistChat: React.FC = () => {
 
       {/* Chat Window */}
       {isOpen && (
-        <div className="fixed bottom-8 end-8 z-50 w-full max-w-xs md:max-w-sm bg-[#E8E0D9] border border-white/40 shadow-2xl rounded-2xl overflow-hidden flex flex-col h-[500px]">
+        <div className="fixed bottom-8 right-8 z-40 w-full max-w-xs md:max-w-sm bg-[#E8E0D9] border border-white/40 shadow-2xl rounded-2xl overflow-hidden flex flex-col h-[500px]">
           {/* Header */}
           <div className="bg-zafting-text p-4 flex justify-between items-center text-[#E8E0D9]">
             <div className="flex items-center gap-2">

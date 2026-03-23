@@ -5,6 +5,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { useCart } from '../contexts/CartContext';
 import { useLanguage } from '../contexts/LanguageContext';
 import { userService, UserAddress } from '../services/user.service';
+import { shippingMethodService, type ShippingMethodDto } from '../services/shippingMethod.service';
 import { formatPriceToman } from '../utils/format';
 
 type CheckoutPreview = {
@@ -32,6 +33,8 @@ export const Checkout: React.FC = () => {
 
   const [addresses, setAddresses] = useState<UserAddress[]>([]);
   const [selectedAddressId, setSelectedAddressId] = useState<string>('');
+  const [shippingMethods, setShippingMethods] = useState<ShippingMethodDto[]>([]);
+  const [selectedShippingMethodId, setSelectedShippingMethodId] = useState<string>('');
   const [discountCode, setDiscountCode] = useState('');
   const [preview, setPreview] = useState<CheckoutPreview | null>(null);
   const [loadingPreview, setLoadingPreview] = useState(false);
@@ -63,13 +66,46 @@ export const Checkout: React.FC = () => {
     };
   }, [isAuthenticated]);
 
+  useEffect(() => {
+    if (!isAuthenticated) return;
+    let cancelled = false;
+    shippingMethodService
+      .getAll()
+      .then((list) => {
+        if (cancelled) return;
+        const active = list.filter((m) => m.isActive);
+        setShippingMethods(active);
+        const first = active[0];
+        if (first?.id) setSelectedShippingMethodId(first.id);
+      })
+      .catch(() => {
+        if (cancelled) return;
+        setShippingMethods([]);
+        setSelectedShippingMethodId('');
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [isAuthenticated]);
+
   const hasCart = cart.length > 0;
+  const cartSignature = useMemo(() => {
+    return cart
+      .map((it) => `${it.basketItemId || it.id}:${it.quantity}`)
+      .sort()
+      .join('|');
+  }, [cart]);
 
   const canPay = useMemo(() => {
-    return hasCart && Boolean(selectedAddressId) && !checkingOut;
-  }, [hasCart, selectedAddressId, checkingOut]);
+    return (
+      hasCart &&
+      Boolean(selectedAddressId) &&
+      Boolean(selectedShippingMethodId) &&
+      !checkingOut
+    );
+  }, [hasCart, selectedAddressId, selectedShippingMethodId, checkingOut]);
 
-  const refreshPreview = useCallback(async (addressId: string, code: string) => {
+  const refreshPreview = useCallback(async (addressId: string, shippingMethodId: string, code: string) => {
     if (!isAuthenticated) return;
     if (!addressId) {
       setPreview(null);
@@ -80,6 +116,7 @@ export const Checkout: React.FC = () => {
     try {
       const payload = {
         addressId,
+        ...(shippingMethodId ? { shippingMethodId } : {}),
         ...(code.trim() ? { discountCode: code.trim() } : {}),
       };
       const { data } = await api.post<CheckoutPreview>('/basket/checkout/preview', payload);
@@ -95,12 +132,22 @@ export const Checkout: React.FC = () => {
   useEffect(() => {
     if (!isAuthenticated) return;
     if (!selectedAddressId) return;
-    refreshPreview(selectedAddressId, discountCode);
-  }, [discountCode, isAuthenticated, refreshPreview, selectedAddressId]);
+    const handle = window.setTimeout(() => {
+      refreshPreview(selectedAddressId, selectedShippingMethodId, discountCode);
+    }, 250);
+    return () => window.clearTimeout(handle);
+  }, [
+    cartSignature,
+    discountCode,
+    isAuthenticated,
+    refreshPreview,
+    selectedAddressId,
+    selectedShippingMethodId,
+  ]);
 
   const applyDiscount = () => {
     if (!selectedAddressId) return;
-    refreshPreview(selectedAddressId, discountCode);
+    refreshPreview(selectedAddressId, selectedShippingMethodId, discountCode);
   };
 
   const handlePay = async () => {
@@ -110,6 +157,7 @@ export const Checkout: React.FC = () => {
     try {
       const payload = {
         addressId: selectedAddressId,
+        shippingMethodId: selectedShippingMethodId,
         ...(discountCode.trim() ? { discountCode: discountCode.trim() } : {}),
       };
       const { data } = await api.post<CheckoutResponse>('/basket/checkout', payload);
@@ -249,6 +297,49 @@ export const Checkout: React.FC = () => {
                         {(a.plaque ? `${t('profile.address.plaque')}: ${a.plaque}` : '')}
                         {(a.unit ? `  ${t('profile.address.unit')}: ${a.unit}` : '')}
                         {(a.postalCode ? `  ${t('profile.address.postalCode')}: ${a.postalCode}` : '')}
+                      </p>
+                    </div>
+                  </label>
+                ))}
+              </div>
+            )}
+          </section>
+
+          <section className="bg-white/40 border border-white rounded-2xl p-6">
+            <h2 className="font-serif text-xl text-zafting-text mb-4">
+              {language === 'fa' ? 'روش ارسال' : 'Shipping method'}
+            </h2>
+            {shippingMethods.length === 0 ? (
+              <p className="font-sans text-sm text-zafting-text/60">
+                {language === 'fa' ? 'روشی برای ارسال تعریف نشده است.' : 'No shipping methods available.'}
+              </p>
+            ) : (
+              <div className="grid grid-cols-1 gap-4">
+                {shippingMethods.map((m) => (
+                  <label
+                    key={m.id}
+                    className="flex gap-3 items-start border border-zafting-text/10 bg-white/40 rounded-2xl p-4 cursor-pointer"
+                  >
+                    <input
+                      type="radio"
+                      name="shipping-method"
+                      className="mt-1"
+                      checked={selectedShippingMethodId === m.id}
+                      onChange={() => setSelectedShippingMethodId(m.id)}
+                    />
+                    <div className="min-w-0">
+                      <p className="font-sans text-sm text-zafting-text/80">
+                        {m.title}
+                      </p>
+                      {m.description ? (
+                        <p className="font-sans text-sm text-zafting-text/60 mt-2">
+                          {m.description}
+                        </p>
+                      ) : null}
+                      <p className="font-sans text-xs text-zafting-text/60 mt-2">
+                        {language === 'fa'
+                          ? `هزینه: ${formatPriceToman(m.price ?? 0)}`
+                          : `Cost: ${formatPriceToman(m.price ?? 0)}`}
                       </p>
                     </div>
                   </label>

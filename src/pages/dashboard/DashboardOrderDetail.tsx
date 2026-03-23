@@ -368,6 +368,12 @@ export const DashboardOrderDetail: React.FC = () => {
               </div>
               <div className="rounded-2xl border border-zafting-text/10 bg-white/40 p-4">
                 <p className="font-sans text-xs text-zafting-text/50">
+                  {language === 'fa' ? 'روش ارسال' : 'Shipping method'}
+                </p>
+                <p className="font-sans text-sm text-zafting-text mt-1">
+                  {order.shippingMethodTitle || '—'}
+                </p>
+                <p className="font-sans text-xs text-zafting-text/50 mt-3">
                   {language === 'fa' ? 'هزینه ارسال' : 'Shipping'}
                 </p>
                 <p className="font-sans text-sm text-zafting-text mt-1">

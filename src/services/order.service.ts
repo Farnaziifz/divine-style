@@ -48,6 +48,9 @@ export type OrderDto = {
   discountCode: string | null;
   discountAmount: number;
   shippingCost: number;
+  shippingMethodId?: string | null;
+  shippingMethodTitle?: string | null;
+  shippingMethodPrice?: number | null;
   payableAmount: number;
   shippingAddress: any;
   createdAt: string;

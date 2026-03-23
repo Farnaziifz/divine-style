@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { ArrowLeft, ArrowRight, X, KeyRound, Smartphone } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useAuth } from '../contexts/AuthContext';
 import { toEnglishDigits } from '../utils/digits';
@@ -16,6 +16,7 @@ export const Auth: React.FC = () => {
   const { t, direction, language } = useLanguage();
   const { login, isAuthenticated } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const [step, setStep] = useState<'phone' | 'otp'>('phone');
   const [phoneNumber, setPhoneNumber] = useState('');
   const [otp, setOtp] = useState<string[]>(Array(OTP_LENGTH).fill(''));
@@ -26,11 +27,24 @@ export const Auth: React.FC = () => {
   const [countdown, setCountdown] = useState(0);
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
+  const nextPath = (() => {
+    try {
+      const params = new URLSearchParams(location.search);
+      const raw = params.get('next');
+      if (!raw) return null;
+      const decoded = decodeURIComponent(raw);
+      if (!decoded.startsWith('/')) return null;
+      return decoded;
+    } catch {
+      return null;
+    }
+  })();
+
   useEffect(() => {
     if (isAuthenticated) {
-      navigate(`/${language}/dashboard`, { replace: true });
+      navigate(nextPath || `/${language}/dashboard`, { replace: true });
     }
-  }, [isAuthenticated, language, navigate]);
+  }, [isAuthenticated, language, navigate, nextPath]);
 
   useEffect(() => {
     if (countdown <= 0) return;
@@ -137,7 +151,7 @@ export const Auth: React.FC = () => {
       }
 
       login(accessToken, refreshToken, user);
-      navigate(`/${language}/dashboard`);
+      navigate(nextPath || `/${language}/dashboard`, { replace: true });
     } catch (err: unknown) {
       const msg =
         err && typeof err === 'object' && 'response' in err
