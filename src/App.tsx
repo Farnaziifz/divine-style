@@ -8,6 +8,7 @@ import { DashboardLayout } from './layouts/DashboardLayout';
 import { Home } from './pages/Home';
 import { Shop } from './pages/Shop';
 import { Category } from './pages/Category';
+import { Collection } from './pages/Collection';
 import { ProductDetail } from './pages/ProductDetail';
 import { StyleInspiration } from './pages/StyleInspiration';
 import { Auth } from './pages/Auth';
@@ -57,6 +58,7 @@ const AppContent = () => {
               <Route index element={<Home />} />
               <Route path="shop" element={<Shop />} />
               <Route path="category/:id" element={<Category />} />
+              <Route path="collection/:id" element={<Collection />} />
               <Route path="product/:id" element={<ProductDetail />} />
               <Route path="styling/:id" element={<StyleInspiration />} />
               <Route path="auth" element={<Auth />} />

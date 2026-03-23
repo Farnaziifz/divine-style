@@ -234,7 +234,7 @@ export const Category: React.FC = () => {
               <span className="font-serif italic text-xl">{t('cat.spotlight')}</span>
            </div>
            
-           <div className="bg-white/40 backdrop-blur-sm rounded-[2rem] p-8 flex flex-col md:flex-row gap-8 items-center border border-white/50">
+           <div className="bg-white/40 backdrop-blur-sm rounded-4xl p-8 flex flex-col md:flex-row gap-8 items-center border border-white/50">
               <div 
                 className="w-full md:w-1/3 aspect-[3/4] relative rounded-xl overflow-hidden shadow-lg rotate-1 hover:rotate-0 transition-transform duration-500 cursor-pointer"
                 onClick={(e) => handleProductClick(featuredProduct, e)}
