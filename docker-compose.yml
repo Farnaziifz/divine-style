@@ -5,7 +5,7 @@ services:
       dockerfile: Dockerfile
       args:
         # آدرس API بک‌اند برای بیلد Vite (در زمان build خوانده می‌شود)
-        VITE_API_URL: http://193.105.234.86:3000/
+        VITE_API_URL: http://193.105.234.86:3005/
     ports:
       - "${PORT:-3000}:80"
 
