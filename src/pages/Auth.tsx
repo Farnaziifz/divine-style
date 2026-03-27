@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { ArrowLeft, ArrowRight, X, KeyRound, Smartphone } from 'lucide-react';
+import { ArrowLeft, ArrowRight, X, KeyRound, Smartphone, Edit2 } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useAuth } from '../contexts/AuthContext';
@@ -51,6 +51,12 @@ export const Auth: React.FC = () => {
     const timer = setInterval(() => setCountdown((c) => c - 1), 1000);
     return () => clearInterval(timer);
   }, [countdown]);
+
+  const formatTime = (seconds: number) => {
+    const m = Math.floor(seconds / 60);
+    const s = seconds % 60;
+    return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+  };
 
   const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = toEnglishDigits(e.target.value);
@@ -224,9 +230,27 @@ export const Auth: React.FC = () => {
                   <BackArrow size={14} /> {t('auth.otp.back')}
                 </button>
 
-                <p className="text-lg mb-6 font-serif">
-                  {t('auth.otp.desc')} <span className="font-sans font-bold dir-ltr">{phoneNumber}</span>
-                </p>
+                <div className="flex items-center justify-between gap-3 mb-6">
+                  <p className="text-lg font-serif">
+                    {t('auth.otp.desc')}{' '}
+                    <span className="font-sans font-bold dir-ltr">{phoneNumber}</span>
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setStep('phone');
+                      setError('');
+                      setOtp(Array(OTP_LENGTH).fill(''));
+                      setPassword('');
+                      setLoginMethod('otp');
+                      setCountdown(0);
+                    }}
+                    className="shrink-0 inline-flex items-center gap-1 text-xs uppercase tracking-widest opacity-60 hover:opacity-100 border-b border-zafting-text/30 pb-0.5"
+                  >
+                    <Edit2 size={14} />
+                    {language === 'fa' ? 'ویرایش' : 'Edit'}
+                  </button>
+                </div>
 
                 <div className="flex bg-white/30 p-1 rounded-xl gap-1 mb-6">
                   <button
@@ -292,7 +316,9 @@ export const Auth: React.FC = () => {
                     <div className="text-center pt-2">
                       {countdown > 0 ? (
                         <p className="text-xs opacity-60 font-mono dir-ltr">
-                          {language === 'fa' ? `ارسال مجدد (${countdown})` : `Resend (${countdown}s)`}
+                          {language === 'fa'
+                            ? `ارسال مجدد (${formatTime(countdown)})`
+                            : `Resend (${formatTime(countdown)})`}
                         </p>
                       ) : (
                         <button

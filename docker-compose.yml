@@ -1,0 +1,11 @@
+services:
+  divine-style:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        # آدرس API بک‌اند برای بیلد Vite (در زمان build خوانده می‌شود)
+        VITE_API_URL: ${VITE_API_URL:-http://host.docker.internal:3005}
+    ports:
+      - "${PORT:-3000}:80"
+

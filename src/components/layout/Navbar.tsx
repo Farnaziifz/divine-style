@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ShoppingBag, User, Menu, Globe, X, ArrowRight, ArrowLeft } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useLanguage } from '../../contexts/LanguageContext';
@@ -11,6 +11,20 @@ export const Navbar: React.FC = () => {
   const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.scrollY > 20) {
+        setIsScrolled(true);
+      } else {
+        setIsScrolled(false);
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   const toggleLanguage = () => {
     setLanguage(language === 'en' ? 'fa' : 'en');
@@ -21,6 +35,10 @@ export const Navbar: React.FC = () => {
         navigate(`/${language}/shop`);
     } else if (key === 'nav.menu.collections') {
         navigate(`/${language}`);
+    } else if (key === 'nav.menu.blog') {
+        navigate(`/${language}/journal`);
+    } else if (key === 'nav.menu.contact') {
+        navigate(`/${language}/contact`);
     }
     setIsMenuOpen(false);
   };
@@ -38,14 +56,20 @@ export const Navbar: React.FC = () => {
     { key: 'nav.menu.shop', href: `/${language}/shop` },
     { key: 'nav.menu.collections', href: `/${language}` },
     // These could be actual routes later
-    { key: 'nav.menu.blog', href: '#' },
+    { key: 'nav.menu.blog', href: `/${language}/journal` },
     { key: 'nav.menu.about', href: '#' },
-    { key: 'nav.menu.contact', href: '#' },
+    { key: 'nav.menu.contact', href: `/${language}/contact` },
   ];
 
   return (
     <>
-      <nav className="fixed top-0 start-0 w-full z-40 px-6 py-6 flex justify-between items-center mix-blend-multiply pointer-events-none">
+      <nav 
+        className={`fixed top-0 start-0 w-full z-40 px-6 py-6 flex justify-between items-center transition-all duration-300 pointer-events-none ${
+          isScrolled 
+            ? 'bg-zafting-bg/90 backdrop-blur-md shadow-sm py-4' 
+            : 'mix-blend-multiply'
+        }`}
+      >
         <Link to={`/${language}`} className="pointer-events-auto text-xl tracking-widest font-sans font-medium text-zafting-text uppercase z-50">
           {t('nav.title')}
         </Link>
