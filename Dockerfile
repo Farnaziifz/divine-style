@@ -15,7 +15,7 @@ COPY public ./public
 COPY src ./src
 RUN npm run build
 
-FROM mirror2.chabokan.net/nginx:latest
+# FROM mirror2.chabokan.net/nginx:latest
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 COPY --from=builder /app/dist /usr/share/nginx/html
 EXPOSE 80
