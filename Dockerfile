@@ -2,6 +2,7 @@ FROM mirror2.chabokan.net/node:20-alpine AS builder
 WORKDIR /app
 
 COPY package.json pnpm-lock.yaml ./
+
 RUN npm config set registry https://mirror2.chabokan.net/npm/
 
 RUN npm install
