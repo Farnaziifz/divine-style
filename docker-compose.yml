@@ -1,13 +1,5 @@
 services:
   divine-style:
-    build:
-      context: .
-      dockerfile: Dockerfile
-      args:
-        # آدرس API بک‌اند برای بیلد Vite (در زمان build خوانده می‌شود)
-        VITE_API_URL: https://api.d-style.ir
-        NODE_IMAGE: ${NODE_IMAGE:-node:22-alpine}
-        NGINX_IMAGE: ${NGINX_IMAGE:-nginx:1.27-alpine}
-        NPM_REGISTRY: ${NPM_REGISTRY:-https://mirror2.chabokan.net/npm/}
+    image: divine-style-1
     ports:
       - "${PORT:-3000}:80"
