@@ -102,6 +102,20 @@ export const Footer: React.FC = () => {
             <a href="#" className="text-zafting-bg/60 hover:text-zafting-bg transition-colors hover:-translate-y-1 transform duration-300">
               <Facebook size={20} strokeWidth={1.5} />
             </a>
+            <a
+              referrerPolicy="origin"
+              target="_blank"
+              href="https://trustseal.enamad.ir/?id=5923529&Code=mfqMbWBGBvz8O8gbbTWG13WZ6kNDy8tG"
+              className="inline-flex items-center"
+            >
+              <img
+                referrerPolicy="origin"
+                src="https://trustseal.enamad.ir/logo.aspx?id=5923529&Code=mfqMbWBGBvz8O8gbbTWG13WZ6kNDy8tG"
+                alt={language === 'en' ? 'Enamad' : 'نماد اعتماد الکترونیکی'}
+                style={{ cursor: 'pointer', height: 42 }}
+                data-code="mfqMbWBGBvz8O8gbbTWG13WZ6kNDy8tG"
+              />
+            </a>
           </div>
           <div className="font-sans text-xs text-zafting-bg/40 tracking-wider">
             © {new Date().getFullYear()} DIVINE STYLE. {language === 'en' ? 'ALL RIGHTS RESERVED.' : 'تمامی حقوق محفوظ است.'}
