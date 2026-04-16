@@ -102,6 +102,7 @@ export const Footer: React.FC = () => {
             <a href="#" className="text-zafting-bg/60 hover:text-zafting-bg transition-colors hover:-translate-y-1 transform duration-300">
               <Facebook size={20} strokeWidth={1.5} />
             </a>
+            <p>salam</p>
             <a
               referrerPolicy="origin"
               target="_blank"
