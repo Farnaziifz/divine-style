@@ -1,26 +1,38 @@
-ARG NODE_IMAGE=node:22-alpine
-ARG NGINX_IMAGE=nginx:1.27-alpine
+# syntax=docker/dockerfile:1
 
-FROM ${NODE_IMAGE} AS builder
+FROM node:22-alpine AS builder
 WORKDIR /app
 
-COPY package.json pnpm-lock.yaml ./
+COPY package.json package-lock.json ./
 
-ARG NPM_REGISTRY=https://mirror2.chabokan.net/npm/
-RUN npm config set registry ${NPM_REGISTRY}
+RUN npm config set registry https://mirror2.chabokan.net/npm/
 
-RUN corepack enable
-RUN pnpm install --frozen-lockfile
+RUN npm i
 
-ARG VITE_API_URL
-ENV VITE_API_URL=$VITE_API_URL
+COPY . .
 
-COPY index.html vite.config.ts tsconfig.json ./
-COPY public ./public
-COPY src ./src
-RUN pnpm build
+ARG GEMINI_API_KEY
+ENV GEMINI_API_KEY=${GEMINI_API_KEY}
 
-FROM ${NGINX_IMAGE}
-COPY nginx.conf /etc/nginx/conf.d/default.conf
-COPY --from=builder /app/dist /usr/share/nginx/html
-EXPOSE 80
+RUN npm run build \
+  && npx esbuild server.ts \
+    --bundle \
+    --platform=node \
+    --format=esm \
+    --packages=external \
+    --outfile=server.mjs
+
+FROM node:22-alpine AS runner
+WORKDIR /app
+
+ENV NODE_ENV=production
+
+COPY package.json package-lock.json ./
+RUN npm config set registry https://mirror2.chabokan.net/npm/ \
+  && npm install --omit=dev
+
+COPY --from=builder /app/server.mjs ./server.mjs
+COPY --from=builder /app/dist ./dist
+
+EXPOSE 3000
+
