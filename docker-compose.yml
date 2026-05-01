@@ -23,4 +23,4 @@ networks:
     driver: bridge
   external-network:
     external: true
-
+    name: ${EXTERNAL_NETWORK:-external-network}
