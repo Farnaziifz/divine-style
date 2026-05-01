@@ -1,6 +1,20 @@
 services:
   divine-style:
-    image: divine-style-6
-   
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        - VITE_API_URL=${VITE_API_URL:-https://api.d-style.ir}
+        - NPM_REGISTRY=${NPM_REGISTRY:-https://registry.npmjs.org/}
+        - NODE_IMAGE=${NODE_IMAGE:-node:20-alpine}
+        - NGINX_IMAGE=${NGINX_IMAGE:-nginx:1.27-alpine}
+    container_name: divine-style-frontend
     ports:
       - "${PORT:-3000}:80"
+    restart: unless-stopped
+    networks:
+      - divine-style-network
+
+networks:
+  divine-style-network:
+    driver: bridge
