@@ -1,5 +1,3 @@
-# syntax=docker/dockerfile:1
-
 ARG NODE_IMAGE=node:20-alpine
 ARG NGINX_IMAGE=nginx:1.27-alpine
 
