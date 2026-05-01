@@ -1,37 +1,47 @@
-ARG NODE_IMAGE=node:20-alpine
-ARG NGINX_IMAGE=nginx:1.27-alpine
+# Build stage
+FROM node:20-alpine AS builder
 
-FROM ${NODE_IMAGE} AS builder
-WORKDIR /app
-
+# Enable Corepack for pnpm version management
+# Corepack will use the version specified in package.json
 RUN corepack enable
 
+WORKDIR /app
+
+# Build arguments
+ARG VITE_API_BASE_URL=http://localhost:63900
+
+# Copy package files
 COPY package.json pnpm-lock.yaml ./
 
-ARG NPM_REGISTRY=https://mirror2.chabokan.net/npm/
-ARG NPM_REGISTRY_FALLBACK=https://registry.npmjs.org/
-ARG NPM_SCOPE=
-ARG NPM_SCOPE_REGISTRY=
-RUN npm config set registry "${NPM_REGISTRY}" \
-  && pnpm config set registry "${NPM_REGISTRY}" \
-  && (npm ping --registry "${NPM_REGISTRY}" >/dev/null 2>&1 || (npm config set registry "${NPM_REGISTRY_FALLBACK}" && pnpm config set registry "${NPM_REGISTRY_FALLBACK}")) \
-  && if [ -n "${NPM_SCOPE}" ] && [ -n "${NPM_SCOPE_REGISTRY}" ]; then \
-    npm config set "${NPM_SCOPE}:registry" "${NPM_SCOPE_REGISTRY}" \
-    && pnpm config set "${NPM_SCOPE}:registry" "${NPM_SCOPE_REGISTRY}"; \
-  fi
+RUN npm config set registry https://mirror2.chabokan.net/npm/
 
-RUN pnpm install --frozen-lockfile
+#RUN npm install -g pnpm
 
-ARG VITE_API_URL=https://api.d-style.ir
-ENV VITE_API_URL=$VITE_API_URL
+# Install dependencies
+RUN npm install 
+#--frozen-lockfile
 
-COPY index.html vite.config.ts tsconfig.json ./
-COPY public ./public
-COPY src ./src
+# Copy source code
+COPY . .
 
-RUN pnpm build
+# Set environment variables for build
+ENV VITE_API_BASE_URL=$VITE_API_BASE_URL
 
-FROM ${NGINX_IMAGE}
-COPY nginx.conf /etc/nginx/conf.d/default.conf
+# Build the application
+RUN npm run build
+
+# Production stage
+FROM nginx:alpine
+
+# Copy built files from builder
 COPY --from=builder /app/dist /usr/share/nginx/html
+
+# Copy nginx configuration
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+
+# Expose port
 EXPOSE 80
+
+# Start nginx
+CMD ["nginx", "-g", "daemon off;"]
+
