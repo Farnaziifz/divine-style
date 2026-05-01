@@ -8,7 +8,7 @@ RUN corepack enable
 WORKDIR /app
 
 # Build arguments
-ARG VITE_API_URL=http://localhost:3005
+ARG VITE_API_URL=http://localhost:3000
 
 # Copy package files
 COPY package.json pnpm-lock.yaml ./
