@@ -1,21 +1,26 @@
+version: '3.8'
+
 services:
-  divine-style:
+  frontend:
     build:
       context: .
       dockerfile: Dockerfile
       args:
-        - VITE_API_URL=${VITE_API_URL:-https://api.d-style.ir}
-        - NPM_REGISTRY=${NPM_REGISTRY:-https://mirror2.chabokan.net/npm/}
-        - NPM_REGISTRY_FALLBACK=${NPM_REGISTRY_FALLBACK:-https://registry.npmjs.org/}
-        - NODE_IMAGE=${NODE_IMAGE:-node:20-alpine}
-        - NGINX_IMAGE=${NGINX_IMAGE:-nginx:1.27-alpine}
-    container_name: divine-style-frontend
+        - VITE_API_BASE_URL=${VITE_API_BASE_URL:-http://localhost:63900}
+    container_name: centropy-admin-frontend
     ports:
-      - "${PORT:-3000}:80"
+      - "${PORT:-8090}:80"
     restart: unless-stopped
     networks:
-      - divine-style-network
+      - centropy-network
+      - panel-network
+      - external-network
 
 networks:
-  divine-style-network:
+  centropy-network:
     driver: bridge
+  panel-network:
+    driver: bridge
+  external-network:
+    external: true
+
