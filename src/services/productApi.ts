@@ -6,7 +6,7 @@
 import { Product, ProductVariant } from '../types';
 
 const apiBaseUrl = () =>
-  import.meta.env.VITE_API_URL || 'http://localhost:3005';
+  import.meta.env.VITE_API_URL || 'https://api.d-style.ir';
 
 function getImageUrl(path: string | undefined | null): string {
   if (!path) return '';

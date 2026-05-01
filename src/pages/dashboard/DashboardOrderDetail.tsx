@@ -11,7 +11,7 @@ import { formatPriceToman } from '../../utils/format';
 import { DashboardPageHeader } from '../../components/dashboard/DashboardPageHeader';
 import { DashboardCard } from '../../components/dashboard/DashboardCard';
 
-const apiBaseUrl = () => import.meta.env.VITE_API_URL || 'http://localhost:3005';
+const apiBaseUrl = () => import.meta.env.VITE_API_URL || 'https://api.d-style.ir';
 
 const getImageUrl = (path: string | null | undefined): string | null => {
   if (!path) return null;

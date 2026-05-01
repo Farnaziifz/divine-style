@@ -2,6 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { Instagram, Twitter, Facebook, ArrowRight, ArrowLeft } from 'lucide-react';
+import enamd from '../../assets/images/home-page/enamd.png';
 
 export const Footer: React.FC = () => {
   const { language, t, direction } = useLanguage();
@@ -102,7 +103,6 @@ export const Footer: React.FC = () => {
             <a href="#" className="text-zafting-bg/60 hover:text-zafting-bg transition-colors hover:-translate-y-1 transform duration-300">
               <Facebook size={20} strokeWidth={1.5} />
             </a>
-            <p>salam</p>
             <a
               referrerPolicy="origin"
               target="_blank"
@@ -111,7 +111,7 @@ export const Footer: React.FC = () => {
             >
               <img
                 referrerPolicy="origin"
-                src="https://trustseal.enamad.ir/logo.aspx?id=5923529&Code=mfqMbWBGBvz8O8gbbTWG13WZ6kNDy8tG"
+                src={enamd}
                 alt={language === 'en' ? 'Enamad' : 'نماد اعتماد الکترونیکی'}
                 style={{ cursor: 'pointer', height: 42 }}
                 data-code="mfqMbWBGBvz8O8gbbTWG13WZ6kNDy8tG"

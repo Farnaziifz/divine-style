@@ -10,7 +10,7 @@ export const DirectChat: React.FC<{
 }> = ({ isOpen, onClose }) => {
   const { language } = useLanguage();
   const { user } = useAuth();
-  const assetBaseUrl = (import.meta.env.VITE_API_URL as string | undefined) || 'http://localhost:3005';
+  const assetBaseUrl = (import.meta.env.VITE_API_URL as string | undefined) || 'https://api.d-style.ir';
   const [messages, setMessages] = useState<DirectMessageDto[]>([]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);

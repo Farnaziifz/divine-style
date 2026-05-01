@@ -92,7 +92,7 @@ export const Shop: React.FC = () => {
   );
 
   const apiBaseUrl = useMemo(
-    () => import.meta.env.VITE_API_URL || 'http://localhost:3005',
+    () => import.meta.env.VITE_API_URL || 'https://api.d-style.ir',
     []
   );
 

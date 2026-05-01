@@ -51,7 +51,7 @@ export const Category: React.FC = () => {
   const itemsPerPage = 5;
 
   const apiBaseUrl = useMemo(
-    () => import.meta.env.VITE_API_URL || 'http://localhost:3005',
+    () => import.meta.env.VITE_API_URL || 'https://api.d-style.ir',
     []
   );
 

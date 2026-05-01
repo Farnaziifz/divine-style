@@ -14,7 +14,7 @@ RUN npm config set registry ${NPM_REGISTRY}
 RUN corepack enable
 RUN pnpm install
 
-ARG VITE_API_URL
+ARG VITE_API_URL=https://api.d-style.ir
 ENV VITE_API_URL=$VITE_API_URL
 
 COPY index.html vite.config.ts tsconfig.json ./

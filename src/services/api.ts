@@ -5,9 +5,9 @@ const getAuthRedirectPath = () => {
   const validLang = lang === 'fa' || lang === 'en' ? lang : 'fa';
   return `/${validLang}/auth`;
 };
-
+console.log(import.meta.env.VITE_API_URL)
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:3005',
+  baseURL: import.meta.env.VITE_API_URL || 'https://api.d-style.ir',
   headers: {
     'Content-Type': 'application/json',
   },
@@ -43,7 +43,7 @@ api.interceptors.response.use(
         }
 
         const response = await axios.post(
-          `${import.meta.env.VITE_API_URL || 'http://localhost:3005'}/auth/refresh`,
+          `${import.meta.env.VITE_API_URL || 'https://api.d-style.ir'}/auth/refresh`,
           {},
           { headers: { Authorization: `Bearer ${refreshToken}` } }
         );

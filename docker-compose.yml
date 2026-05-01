@@ -1,5 +1,6 @@
 services:
   divine-style:
-    image: divine-style-3
+    image: divine-style-6
+   
     ports:
       - "${PORT:-3000}:80"
