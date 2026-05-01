@@ -5,7 +5,8 @@ services:
       dockerfile: Dockerfile
       args:
         - VITE_API_URL=${VITE_API_URL:-https://api.d-style.ir}
-        - NPM_REGISTRY=${NPM_REGISTRY:-https://registry.npmjs.org/}
+        - NPM_REGISTRY=${NPM_REGISTRY:-https://mirror2.chabokan.net/npm/}
+        - NPM_REGISTRY_FALLBACK=${NPM_REGISTRY_FALLBACK:-https://registry.npmjs.org/}
         - NODE_IMAGE=${NODE_IMAGE:-node:20-alpine}
         - NGINX_IMAGE=${NGINX_IMAGE:-nginx:1.27-alpine}
     container_name: divine-style-frontend
