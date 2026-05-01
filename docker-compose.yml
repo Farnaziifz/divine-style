@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   frontend:
     build:
@@ -22,5 +20,5 @@ networks:
   panel-network:
     driver: bridge
   external-network:
-    external: true
+    driver: bridge
     name: ${EXTERNAL_NETWORK:-external-network}
