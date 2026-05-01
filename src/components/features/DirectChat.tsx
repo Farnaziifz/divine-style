@@ -3,6 +3,7 @@ import { Image as ImageIcon, Loader2, Mic, Pause, Play, Send, Trash2, X } from '
 import { useLanguage } from '../../contexts/LanguageContext';
 import { useAuth } from '../../contexts/AuthContext';
 import { directChatService, type DirectMessageDto } from '../../services/directChat.service';
+import { resolveImageUrl } from '../../utils/imageUrl';
 
 export const DirectChat: React.FC<{
   isOpen: boolean;
@@ -10,7 +11,6 @@ export const DirectChat: React.FC<{
 }> = ({ isOpen, onClose }) => {
   const { language } = useLanguage();
   const { user } = useAuth();
-  const assetBaseUrl = (import.meta.env.VITE_API_URL as string | undefined) || 'https://api.d-style.ir';
   const [messages, setMessages] = useState<DirectMessageDto[]>([]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
@@ -37,10 +37,7 @@ export const DirectChat: React.FC<{
   // همیشه همه‌ی هوک‌ها را فراخوانی می‌کنیم؛ نمایش را در JSX کنترل می‌کنیم
 
   const resolveAssetUrl = (path: string) => {
-    if (!path) return path;
-    if (path.startsWith('http') || path.startsWith('blob:') || path.startsWith('data:')) return path;
-    if (path.startsWith('/')) return `${assetBaseUrl}${path}`;
-    return `${assetBaseUrl}/${path}`;
+    return resolveImageUrl(path) ?? path;
   };
 
   const formatDuration = (seconds: number) => {

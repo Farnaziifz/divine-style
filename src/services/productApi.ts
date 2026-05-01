@@ -4,21 +4,10 @@
  */
 
 import { Product, ProductVariant } from '../types';
-
-const apiBaseUrl = () =>
-  import.meta.env.VITE_API_URL || 'https://api.d-style.ir';
+import { getApiBaseUrl, resolveImageUrl } from '../utils/imageUrl';
 
 function getImageUrl(path: string | undefined | null): string {
-  if (!path) return '';
-  if (
-    path.startsWith('http') ||
-    path.startsWith('blob:') ||
-    path.startsWith('data:')
-  ) {
-    return path;
-  }
-  const base = apiBaseUrl();
-  return path.startsWith('/') ? `${base}${path}` : `${base}/${path}`;
+  return resolveImageUrl(path) ?? '';
 }
 
 export type ApiSpecificationValue = string | number | boolean | null;
@@ -214,7 +203,7 @@ export function mapApiProductToProduct(api: ApiProduct): Product {
 }
 
 export async function fetchProductById(id: string): Promise<Product> {
-  const base = apiBaseUrl();
+  const base = getApiBaseUrl();
   const url = `${base}/products/${id}`;
   const res = await fetch(url);
   if (!res.ok) {
@@ -235,7 +224,7 @@ export interface FetchProductListParams {
 export async function fetchProductList(
   params: FetchProductListParams = {}
 ): Promise<Product[]> {
-  const base = apiBaseUrl();
+  const base = getApiBaseUrl();
   const search = new URLSearchParams();
   if (params.page != null) search.set('page', String(params.page));
   search.set('limit', String(params.limit ?? 20));

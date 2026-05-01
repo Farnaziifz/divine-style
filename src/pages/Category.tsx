@@ -5,6 +5,7 @@ import { useLanguage } from '../contexts/LanguageContext';
 import { useCart } from '../contexts/CartContext';
 import { Filter, SlidersHorizontal, ArrowRight, ArrowLeft, Percent, ShoppingBag } from 'lucide-react';
 import { formatPriceToman } from '../utils/format';
+import { getApiBaseUrl, resolveImageUrl } from '../utils/imageUrl';
 
 type ApiProductVariant = {
   sku: string;
@@ -50,18 +51,11 @@ export const Category: React.FC = () => {
 
   const itemsPerPage = 5;
 
-  const apiBaseUrl = useMemo(
-    () => import.meta.env.VITE_API_URL || 'https://api.d-style.ir',
-    []
-  );
-
   const getImageUrl = (path?: string | null) => {
-    if (!path) return '';
-    if (path.startsWith('http') || path.startsWith('blob:') || path.startsWith('data:')) {
-      return path;
-    }
-    return `${apiBaseUrl}${path}`;
+    return resolveImageUrl(path) ?? '';
   };
+
+  const apiBaseUrl = useMemo(() => getApiBaseUrl(), []);
 
   const toUiProduct = (p: ApiProduct): Product => {
     const firstVariant = p.variants?.[0];

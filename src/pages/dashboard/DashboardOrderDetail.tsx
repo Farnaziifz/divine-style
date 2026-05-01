@@ -10,20 +10,10 @@ import {
 import { formatPriceToman } from '../../utils/format';
 import { DashboardPageHeader } from '../../components/dashboard/DashboardPageHeader';
 import { DashboardCard } from '../../components/dashboard/DashboardCard';
-
-const apiBaseUrl = () => import.meta.env.VITE_API_URL || 'https://api.d-style.ir';
+import { resolveImageUrl } from '../../utils/imageUrl';
 
 const getImageUrl = (path: string | null | undefined): string | null => {
-  if (!path) return null;
-  if (
-    path.startsWith('http') ||
-    path.startsWith('blob:') ||
-    path.startsWith('data:')
-  ) {
-    return path;
-  }
-  const base = apiBaseUrl();
-  return path.startsWith('/') ? `${base}${path}` : `${base}/${path}`;
+  return resolveImageUrl(path);
 };
 
 export const DashboardOrderDetail: React.FC = () => {

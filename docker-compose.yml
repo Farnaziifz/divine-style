@@ -4,10 +4,10 @@ services:
       context: .
       dockerfile: Dockerfile
       args:
-        - VITE_API_BASE_URL=${VITE_API_BASE_URL:-http://localhost:63900}
+        - VITE_API_URL=${VITE_API_URL:-http://localhost:3005}
     container_name: d-style-site
     ports:
-      - "${PORT:-3000}:80"
+      - "${PORT:-3005}:80"
     restart: unless-stopped
     networks:
       - dstyle-network

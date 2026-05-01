@@ -3,6 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft, ArrowRight, ArrowUpRight } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
 import { formatPriceToman } from '../utils/format';
+import { getApiBaseUrl, resolveImageUrl } from '../utils/imageUrl';
 
 type ApiProductVariant = {
   sku: string;
@@ -54,18 +55,11 @@ export const Collection: React.FC = () => {
   const [products, setProducts] = useState<UiProductCard[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  const apiBaseUrl = useMemo(
-    () => import.meta.env.VITE_API_URL || 'https://api.d-style.ir',
-    [],
-  );
-
   const getImageUrl = (path?: string | null) => {
-    if (!path) return '';
-    if (path.startsWith('http') || path.startsWith('blob:') || path.startsWith('data:')) {
-      return path;
-    }
-    return `${apiBaseUrl}${path}`;
+    return resolveImageUrl(path) ?? '';
   };
+
+  const apiBaseUrl = useMemo(() => getApiBaseUrl(), []);
 
   const toUiProduct = (p: ApiProduct): UiProductCard => {
     const firstVariant = p.variants?.[0];
@@ -209,4 +203,3 @@ export const Collection: React.FC = () => {
     </div>
   );
 };
-

@@ -1,13 +1,14 @@
 import axios from 'axios';
+import { getApiBaseUrl } from '../utils/imageUrl';
 
 const getAuthRedirectPath = () => {
   const lang = window.location.pathname.split('/')[1];
   const validLang = lang === 'fa' || lang === 'en' ? lang : 'fa';
   return `/${validLang}/auth`;
 };
-console.log(import.meta.env.VITE_API_URL)
+
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'https://api.d-style.ir',
+  baseURL: getApiBaseUrl(),
   headers: {
     'Content-Type': 'application/json',
   },
@@ -43,7 +44,7 @@ api.interceptors.response.use(
         }
 
         const response = await axios.post(
-          `${import.meta.env.VITE_API_URL || 'https://api.d-style.ir'}/auth/refresh`,
+          `${getApiBaseUrl()}/auth/refresh`,
           {},
           { headers: { Authorization: `Bearer ${refreshToken}` } }
         );

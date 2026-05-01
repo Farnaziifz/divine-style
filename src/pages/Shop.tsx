@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '../contexts/LanguageContext';
 import { ArrowRight, ArrowLeft, ArrowDownLeft, ShoppingBag, ArrowUpRight } from 'lucide-react';
 import { PRODUCTS } from '../constants';
+import { getApiBaseUrl, resolveImageUrl } from '../utils/imageUrl';
 
 type ApiCategory = {
   id: string;
@@ -91,18 +92,11 @@ export const Shop: React.FC = () => {
     []
   );
 
-  const apiBaseUrl = useMemo(
-    () => import.meta.env.VITE_API_URL || 'https://api.d-style.ir',
-    []
-  );
-
   const getImageUrl = (path?: string | null) => {
-    if (!path) return undefined;
-    if (path.startsWith('http') || path.startsWith('blob:') || path.startsWith('data:')) {
-      return path;
-    }
-    return `${apiBaseUrl}${path}`;
+    return resolveImageUrl(path) ?? undefined;
   };
+
+  const apiBaseUrl = useMemo(() => getApiBaseUrl(), []);
 
   const [categories, setCategories] = useState<ApiCategory[]>([]);
   const [isCategoriesLoading, setIsCategoriesLoading] = useState(true);
