@@ -7,17 +7,17 @@ services:
       dockerfile: Dockerfile
       args:
         - VITE_API_BASE_URL=${VITE_API_BASE_URL:-http://localhost:63900}
-    container_name: centropy-admin-frontend
+    container_name: d-style-site
     ports:
-      - "${PORT:-8090}:80"
+      - "${PORT:-3005}:80"
     restart: unless-stopped
     networks:
-      - centropy-network
+      - dstyle-network
       - panel-network
       - external-network
 
 networks:
-  centropy-network:
+  dstyle-network:
     driver: bridge
   panel-network:
     driver: bridge
