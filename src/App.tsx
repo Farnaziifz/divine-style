@@ -1,5 +1,5 @@
-import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate, useParams, Outlet } from 'react-router-dom';
+import React, { useEffect } from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate, useParams, Outlet, useLocation } from 'react-router-dom';
 import { LanguageProvider } from './contexts/LanguageContext';
 import { CartProvider } from './contexts/CartContext';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
@@ -26,6 +26,16 @@ import { DashboardAddresses } from './pages/dashboard/DashboardAddresses';
 import { DashboardOrderDetail } from './pages/dashboard/DashboardOrderDetail';
 
 const RootRedirect = () => <Navigate to="/fa" replace />;
+
+const ScrollToTop = () => {
+  const location = useLocation();
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [location.pathname, location.search]);
+
+  return null;
+};
 
 const ProtectedDashboard = () => {
   const { lang } = useParams<{ lang: string }>();
@@ -82,6 +92,7 @@ const AppContent = () => {
 export default function App() {
   return (
     <Router>
+      <ScrollToTop />
       <AppContent />
     </Router>
   );

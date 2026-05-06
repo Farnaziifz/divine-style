@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Outlet, NavLink, useLocation, useParams, useNavigate } from 'react-router-dom';
 import { User, Package, Heart, ShoppingBag, LogOut, Menu, MapPin, ArrowLeft, ArrowRight } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
@@ -14,10 +14,19 @@ export const DashboardLayout: React.FC = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+  const mainRef = useRef<HTMLElement | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const base = `/${lang || 'fa'}/dashboard`;
   const isRtl = language === 'fa';
   const isInAdminArea = location.pathname.includes('/dashboard/admin/');
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+    if (mainRef.current) {
+      mainRef.current.scrollTop = 0;
+      mainRef.current.scrollLeft = 0;
+    }
+  }, [location.pathname, location.search]);
 
   const navItems = [
     { to: 'profile', key: 'dashboard.menu.profile', icon: User },
@@ -145,7 +154,7 @@ export const DashboardLayout: React.FC = () => {
         <div className="hidden lg:block shrink-0 w-72" aria-hidden />
 
         {/* Main content column - always visible and accessible */}
-        <main className="min-w-0 overflow-auto">
+        <main ref={mainRef} className="min-w-0 overflow-auto">
           <div className="p-6 md:p-8 max-w-4xl mx-auto">
             <Outlet />
           </div>
