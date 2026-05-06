@@ -101,8 +101,9 @@ export const Shop: React.FC = () => {
   const [categories, setCategories] = useState<ApiCategory[]>([]);
   const [isCategoriesLoading, setIsCategoriesLoading] = useState(true);
 
-  const [collectionCards, setCollectionCards] = useState<UiCollectionCard[]>(fallbackCollections);
+  const [collectionCards, setCollectionCards] = useState<UiCollectionCard[]>([]);
   const [isCollectionsLoading, setIsCollectionsLoading] = useState(true);
+  const [hasCollections, setHasCollections] = useState(false);
 
   const [activeIndex, setActiveIndex] = useState(0);
 
@@ -170,11 +171,13 @@ export const Shop: React.FC = () => {
           };
         });
 
-        setCollectionCards(mapped.length ? mapped : fallbackCollections);
+        setHasCollections(mapped.length > 0);
+        setCollectionCards(mapped);
         setActiveIndex(0);
       } catch (error) {
         console.error('Failed to fetch collections', error);
-        setCollectionCards(fallbackCollections);
+        setHasCollections(false);
+        setCollectionCards([]);
         setActiveIndex(0);
       } finally {
         setIsCollectionsLoading(false);
@@ -208,65 +211,73 @@ export const Shop: React.FC = () => {
     <div className="w-full bg-[#E8E0D9] min-h-screen pt-20">
       
       {/* 2. Collections Section */}
-      <section className="px-6 pb-20 max-w-[1600px] mx-auto">
-        <div className="flex items-end justify-between mb-10">
-          <div>
-            <div className="inline-block px-4 py-1 border border-zafting-text/30 rounded-full text-xs uppercase tracking-widest mb-6">
-              #collection
+      {hasCollections ? (
+        <section className="px-6 pb-20 max-w-[1600px] mx-auto">
+          <div className="flex items-end justify-between mb-10">
+            <div>
+              <div className="inline-block px-4 py-1 border border-zafting-text/30 rounded-full text-xs uppercase tracking-widest mb-6">
+                #collection
+              </div>
+              <h2 className="font-serif text-4xl md:text-6xl text-zafting-text leading-[0.9]">
+                {t('collection.title')}
+              </h2>
             </div>
-            <h2 className="font-serif text-4xl md:text-6xl text-zafting-text leading-[0.9]">
-              {t('collection.title')}
-            </h2>
+            <button
+              type="button"
+              onClick={nextCollection}
+              disabled={isCollectionsLoading || collectionCards.length <= 1}
+              className="w-12 h-12 rounded-full bg-[#2A2A2A] text-white flex items-center justify-center hover:scale-110 transition-transform disabled:opacity-60 disabled:cursor-not-allowed"
+            >
+              <ArrowIcon size={20} />
+            </button>
           </div>
-          <button
-            type="button"
-            onClick={nextCollection}
-            disabled={isCollectionsLoading || collectionCards.length <= 1}
-            className="w-12 h-12 rounded-full bg-[#2A2A2A] text-white flex items-center justify-center hover:scale-110 transition-transform disabled:opacity-60 disabled:cursor-not-allowed"
-          >
-            <ArrowIcon size={20} />
-          </button>
-        </div>
 
-        {isCollectionsLoading ? (
-          <div className="flex justify-center py-16 text-zafting-text/60">
-            <span className="text-sm uppercase tracking-widest">{t('loading') || 'Loading...'}</span>
-          </div>
-        ) : (
-          <div className="relative h-[420px] md:h-[460px]">
-            {collectionCards.slice(0, 3).map((c, idx) => {
-              const style = getCardStyle(idx);
-              return (
-                <div
-                  key={c.id}
-                  className="absolute inset-0 transition-all duration-500 ease-out cursor-pointer"
-                  style={style}
-                  onClick={() => navigate(`/${language}/collection/${c.id}`)}
-                >
-                  <div className={`w-full h-full rounded-4xl overflow-hidden relative ${c.bgColor}`}>
-                    <img
-                      src={c.image}
-                      alt={c.tag}
-                      className="absolute inset-0 w-full h-full object-cover opacity-70"
-                    />
-                    <div className="absolute inset-0 bg-black/20" />
-                    <div className="absolute inset-0 p-8 md:p-10 flex flex-col justify-between">
-                      <div className={`inline-flex ${c.textColor} text-xs uppercase tracking-widest`}>
-                        {c.tag}
-                      </div>
-                      <div className={`max-w-xl ${c.textColor}`}>
-                        <p className="font-sans text-sm md:text-base opacity-90 leading-7">
-                          {c.desc}
-                        </p>
+          {isCollectionsLoading ? (
+            <div className="flex justify-center py-16 text-zafting-text/60">
+              <span className="text-sm uppercase tracking-widest">
+                {t('loading') || 'Loading...'}
+              </span>
+            </div>
+          ) : (
+            <div className="relative h-[420px] md:h-[460px]">
+              {collectionCards.slice(0, 3).map((c, idx) => {
+                const style = getCardStyle(idx);
+                return (
+                  <div
+                    key={c.id}
+                    className="absolute inset-0 transition-all duration-500 ease-out cursor-pointer"
+                    style={style}
+                    onClick={() => navigate(`/${language}/collection/${c.id}`)}
+                  >
+                    <div
+                      className={`w-full h-full rounded-4xl overflow-hidden relative ${c.bgColor}`}
+                    >
+                      <img
+                        src={c.image}
+                        alt={c.tag}
+                        className="absolute inset-0 w-full h-full object-cover opacity-70"
+                      />
+                      <div className="absolute inset-0 bg-black/20" />
+                      <div className="absolute inset-0 p-8 md:p-10 flex flex-col justify-between">
+                        <div
+                          className={`inline-flex ${c.textColor} text-xs uppercase tracking-widest`}
+                        >
+                          {c.tag}
+                        </div>
+                        <div className={`max-w-xl ${c.textColor}`}>
+                          <p className="font-sans text-sm md:text-base opacity-90 leading-7">
+                            {c.desc}
+                          </p>
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
-              );
-            })}
-          </div>
-        )}
-      </section>
+                );
+              })}
+            </div>
+          )}
+        </section>
+      ) : null}
 
 
    
