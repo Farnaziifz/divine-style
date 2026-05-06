@@ -104,9 +104,8 @@ export const Footer: React.FC = () => {
               <Facebook size={20} strokeWidth={1.5} />
             </a>
             <a
-              referrerPolicy="origin"
               target="_blank"
-              href="https://trustseal.enamad.ir/?id=5923529&Code=mfqMbWBGBvz8O8gbbTWG13WZ6kNDy8tG"
+              href="https://trustseal.enamad.ir/?id=717666&Code=mfqMbWBGBvz8O8gbbTWG13WZ6kNDy8tG"
               className="inline-flex items-center"
             >
               <img
@@ -114,7 +113,6 @@ export const Footer: React.FC = () => {
                 src={enamd}
                 alt={language === 'en' ? 'Enamad' : 'نماد اعتماد الکترونیکی'}
                 style={{ cursor: 'pointer', height: 42 }}
-                data-code="mfqMbWBGBvz8O8gbbTWG13WZ6kNDy8tG"
               />
             </a>
           </div>
