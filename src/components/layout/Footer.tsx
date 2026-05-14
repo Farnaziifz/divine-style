@@ -115,7 +115,21 @@ export const Footer: React.FC = () => {
                 style={{ cursor: 'pointer', height: 42 }}
               />
             </a> */}
-            <a referrerpolicy='origin' target='_blank' href='https://trustseal.enamad.ir/?id=717666&Code=mfqMbWBGBvz8O8gbbTWG13WZ6kNDy8tG'><img referrerpolicy='origin' src='https://trustseal.enamad.ir/logo.aspx?id=717666&Code=mfqMbWBGBvz8O8gbbTWG13WZ6kNDy8tG' alt='' style='cursor:pointer' code='mfqMbWBGBvz8O8gbbTWG13WZ6kNDy8tG'></a>
+            <a
+              referrerPolicy="origin"
+              target="_blank"
+              rel="noopener noreferrer"
+              href="https://trustseal.enamad.ir/?id=717666&Code=mfqMbWBGBvz8O8gbbTWG13WZ6kNDy8tG"
+              className="inline-flex items-center"
+            >
+              <img
+                referrerPolicy="origin"
+                src="https://trustseal.enamad.ir/logo.aspx?id=717666&Code=mfqMbWBGBvz8O8gbbTWG13WZ6kNDy8tG"
+                alt={language === 'en' ? 'Enamad' : 'نماد اعتماد الکترونیکی'}
+                style={{ cursor: 'pointer' }}
+                {...({ code: 'mfqMbWBGBvz8O8gbbTWG13WZ6kNDy8tG' } as React.ImgHTMLAttributes<HTMLImageElement>)}
+              />
+            </a>
           </div>
           <div className="font-sans text-xs text-zafting-bg/40 tracking-wider">
             © {new Date().getFullYear()} DIVINE STYLE. {language === 'en' ? 'ALL RIGHTS RESERVED.' : 'تمامی حقوق محفوظ است.'}
