@@ -103,7 +103,7 @@ export const Footer: React.FC = () => {
             <a href="#" className="text-zafting-bg/60 hover:text-zafting-bg transition-colors hover:-translate-y-1 transform duration-300">
               <Facebook size={20} strokeWidth={1.5} />
             </a>
-            {/* <a
+            <a
               target="_blank"
               href="https://trustseal.enamad.ir/?id=717666&Code=mfqMbWBGBvz8O8gbbTWG13WZ6kNDy8tG"
               className="inline-flex items-center"
@@ -112,10 +112,11 @@ export const Footer: React.FC = () => {
                 referrerPolicy="origin"
                 src={enamd}
                 alt={language === 'en' ? 'Enamad' : 'نماد اعتماد الکترونیکی'}
+                className="grayscale"
                 style={{ cursor: 'pointer', height: 42 }}
               />
-            </a> */}
-            <a
+            </a>
+            {/* <a
               referrerPolicy="origin"
               target="_blank"
               rel="noopener noreferrer"
@@ -129,7 +130,7 @@ export const Footer: React.FC = () => {
                 style={{ cursor: 'pointer' }}
                 {...({ code: 'mfqMbWBGBvz8O8gbbTWG13WZ6kNDy8tG' } as React.ImgHTMLAttributes<HTMLImageElement>)}
               />
-            </a>
+            </a> */}
           </div>
           <div className="font-sans text-xs text-zafting-bg/40 tracking-wider">
             © {new Date().getFullYear()} DIVINE STYLE. {language === 'en' ? 'ALL RIGHTS RESERVED.' : 'تمامی حقوق محفوظ است.'}
