@@ -63,15 +63,31 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   useEffect(() => {
     if (!isAuthenticated) return;
     let cancelled = false;
-    api
-      .get('/basket')
-      .then((res) => {
+    (async () => {
+      try {
+        const localRaw = localStorage.getItem(CART_STORAGE_KEY);
+        const localParsed = localRaw ? (JSON.parse(localRaw) as CartItem[]) : [];
+        const localUnsynced = Array.isArray(localParsed)
+          ? localParsed.filter((it) => !it?.basketItemId && it?.id && it?.quantity > 0)
+          : [];
+
+        if (localUnsynced.length > 0) {
+          for (const item of localUnsynced) {
+            if (cancelled) return;
+            await api.post('/basket/items', {
+              productId: item.id,
+              quantity: item.quantity,
+            });
+          }
+        }
+
+        const res = await api.get('/basket');
         if (cancelled) return;
         setCart(hydrateFromBasketResponse(res.data));
-      })
-      .catch(() => {
+      } catch {
         // ignore
-      });
+      }
+    })();
     return () => {
       cancelled = true;
     };

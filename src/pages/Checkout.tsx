@@ -158,6 +158,7 @@ export const Checkout: React.FC = () => {
       const payload = {
         addressId: selectedAddressId,
         shippingMethodId: selectedShippingMethodId,
+        lang: language,
         ...(discountCode.trim() ? { discountCode: discountCode.trim() } : {}),
       };
       const { data } = await api.post<CheckoutResponse>('/basket/checkout', payload);
