@@ -41,6 +41,13 @@ export const Checkout: React.FC = () => {
   const [checkingOut, setCheckingOut] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const [paymentProviders, setPaymentProviders] = useState<
+    Array<'ZARINPAL' | 'ZIBAL'>
+  >(['ZARINPAL']);
+  const [paymentProvider, setPaymentProvider] = useState<'ZARINPAL' | 'ZIBAL'>(
+    'ZARINPAL',
+  );
+
   useEffect(() => {
     if (!isAuthenticated) {
       navigate(`/${language}/auth`, { replace: true });
@@ -60,6 +67,33 @@ export const Checkout: React.FC = () => {
       })
       .catch(() => {
         // ignore
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [isAuthenticated]);
+
+  useEffect(() => {
+    if (!isAuthenticated) return;
+    let cancelled = false;
+    api
+      .get<{
+        activeProviders: Array<'ZARINPAL' | 'ZIBAL'>;
+        defaultProvider: 'ZARINPAL' | 'ZIBAL';
+      }>('/payments/providers')
+      .then(({ data }) => {
+        if (cancelled) return;
+        const active = Array.isArray(data.activeProviders) && data.activeProviders.length > 0
+          ? data.activeProviders
+          : (['ZARINPAL'] as Array<'ZARINPAL' | 'ZIBAL'>);
+        setPaymentProviders(active);
+        const def = active.includes(data.defaultProvider) ? data.defaultProvider : active[0];
+        setPaymentProvider(def);
+      })
+      .catch(() => {
+        if (cancelled) return;
+        setPaymentProviders(['ZARINPAL']);
+        setPaymentProvider('ZARINPAL');
       });
     return () => {
       cancelled = true;
@@ -159,6 +193,7 @@ export const Checkout: React.FC = () => {
         addressId: selectedAddressId,
         shippingMethodId: selectedShippingMethodId,
         lang: language,
+        paymentProvider,
         ...(discountCode.trim() ? { discountCode: discountCode.trim() } : {}),
       };
       const { data } = await api.post<CheckoutResponse>('/basket/checkout', payload);
@@ -251,6 +286,38 @@ export const Checkout: React.FC = () => {
           </section>
 
           <section className="bg-white/40 border border-white rounded-2xl p-6">
+            {paymentProviders.length > 1 ? (
+              <div className="mb-6">
+                <h2 className="font-serif text-xl text-zafting-text mb-4">
+                  {t('checkout.paymentMethod') ?? (language === 'fa' ? 'درگاه پرداخت' : 'Payment gateway')}
+                </h2>
+                <div className="flex flex-col gap-3">
+                  {paymentProviders.map((p) => (
+                    <label
+                      key={p}
+                      className="flex items-center justify-between gap-3 rounded-xl border border-zafting-text/15 bg-white/50 px-4 py-3"
+                    >
+                      <div className="flex items-center gap-3">
+                        <input
+                          type="radio"
+                          name="paymentProvider"
+                          value={p}
+                          checked={paymentProvider === p}
+                          onChange={() => setPaymentProvider(p)}
+                        />
+                        <span className="font-sans text-sm text-zafting-text">
+                          {p === 'ZARINPAL' ? 'زرین‌پال' : 'زیبال'}
+                        </span>
+                      </div>
+                      <span className="font-sans text-xs text-zafting-text/50 dir-ltr">
+                        {p}
+                      </span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+            ) : null}
+
             <div className="flex items-center justify-between gap-4">
               <h2 className="font-serif text-xl text-zafting-text">
                 {t('checkout.address')}
