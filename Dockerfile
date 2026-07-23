@@ -13,8 +13,6 @@ ARG VITE_API_URL=http://localhost:3000
 # Copy package files
 COPY package.json pnpm-lock.yaml ./
 
-RUN npm config set registry https://mirror2.chabokan.net/npm/
-
 #RUN npm install -g pnpm
 
 # Install dependencies
