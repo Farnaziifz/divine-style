@@ -16,6 +16,7 @@ import { Profile } from './pages/Profile';
 import { Checkout } from './pages/Checkout';
 import { PaymentSuccess } from './pages/PaymentSuccess';
 import { PaymentFailed } from './pages/PaymentFailed';
+import { PaymentResult } from './pages/PaymentResult';
 import { Journal } from './pages/Journal';
 import { JournalPost } from './pages/JournalPost';
 import { Contact } from './pages/Contact';
@@ -81,6 +82,7 @@ const AppContent = () => {
               <Route path="checkout" element={<Checkout />} />
               <Route path="payment/success" element={<PaymentSuccess />} />
               <Route path="payment/failed" element={<PaymentFailed />} />
+              <Route path="payment/result/:orderCode" element={<PaymentResult />} />
             </Route>
           </Routes>
         </CartProvider>
