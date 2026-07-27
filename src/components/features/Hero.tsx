@@ -133,28 +133,28 @@ export const Hero: React.FC<HeroProps> = ({ products, onProductClick }) => {
                  goNext();
                }
              }}
-             className={`absolute bottom-8 -end-4 md:-end-12 z-20 backdrop-blur-md bg-white/10 border border-white/20 p-6 rounded-2xl shadow-lg w-64 ${canSlide ? 'cursor-pointer' : ''}`}
+             className={`absolute bottom-6 -end-4 md:-end-12 z-20 backdrop-blur-xl bg-zafting-bg/90 border border-white/60 p-6 rounded-2xl shadow-xl shadow-black/10 w-[85%] max-w-64 sm:max-w-72 ${canSlide ? 'cursor-pointer' : ''}`}
            >
-              <div className="flex justify-between items-end">
-                <div>
-                    <h3 className="font-serif text-2xl text-zafting-text">{activeProduct.name}</h3>
-                    <p className="text-xs text-zafting-text/80 mt-1 font-sans font-light">
+              <div className="flex justify-between items-end gap-3">
+                <div className="min-w-0">
+                    <h3 className="font-serif text-2xl text-zafting-text truncate">{activeProduct.name}</h3>
+                    <p className="text-xs text-zafting-text/70 mt-1 font-sans font-light line-clamp-2">
                         {activeProduct.description}
                     </p>
-                    <p className="text-lg font-medium mt-2">{formatPriceToman(activeProduct.price)}</p>
+                    <p className="text-lg font-medium mt-2 text-zafting-text">{formatPriceToman(activeProduct.price)}</p>
                 </div>
-                <button 
+                <button
                     onClick={(e) => {
                       e.stopPropagation();
                       onProductClick(activeProduct);
                     }}
-                    className="p-3 bg-transparent border border-zafting-text/30 rounded-full hover:bg-zafting-text hover:text-[#E8E0D9] transition-colors group"
+                    className="shrink-0 p-3 bg-transparent border border-zafting-text/30 rounded-full hover:bg-zafting-text hover:text-zafting-bg transition-colors group"
                     aria-label={t('hero.cta')}
                 >
                     <ArrowIcon size={18} className="group-hover:scale-110 transition-transform" />
                 </button>
               </div>
-              
+
               {/* Pagination Dots */}
               <div className="flex gap-2 mt-4">
                   {safeProducts.map((_, i) => (
@@ -165,7 +165,7 @@ export const Hero: React.FC<HeroProps> = ({ products, onProductClick }) => {
                         e.stopPropagation();
                         goTo(i);
                       }}
-                      className={`w-2 h-2 rounded-full ${i === activeIndex ? 'bg-zafting-text' : 'bg-zafting-text/30'}`}
+                      className={`h-1.5 rounded-full transition-all ${i === activeIndex ? 'w-5 bg-zafting-text' : 'w-1.5 bg-zafting-text/40'}`}
                       aria-label={`slide-${i + 1}`}
                     />
                   ))}
