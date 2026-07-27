@@ -195,6 +195,7 @@ export function mapApiProductToProduct(api: ApiProduct): Product {
     image: getImageUrl(image) || '',
     gallery: gallery.length > 0 ? gallery : undefined,
     category: api.category?.title ?? '',
+    categoryId: api.categoryId,
     sizes,
     variants: productVariants.length > 0 ? productVariants : undefined,
     fabric,
@@ -217,6 +218,7 @@ export async function fetchProductById(id: string): Promise<Product> {
 export interface FetchProductListParams {
   isFeatured?: boolean;
   showInIntro?: boolean;
+  categoryId?: string;
   limit?: number;
   page?: number;
 }
@@ -230,6 +232,7 @@ export async function fetchProductList(
   search.set('limit', String(params.limit ?? 20));
   if (params.isFeatured === true) search.set('isFeatured', 'true');
   if (params.showInIntro === true) search.set('showInIntro', 'true');
+  if (params.categoryId) search.set('categoryId', params.categoryId);
   const url = `${base}/products?${search.toString()}`;
   const res = await fetch(url);
   if (!res.ok) return [];

@@ -53,7 +53,7 @@ export const IntroSection: React.FC<IntroSectionProps> = ({
             e.stopPropagation();
             onAddToCart(product);
           }}
-          className="absolute bottom-4 inset-e-4 bg-white/20 backdrop-blur-md p-3 rounded-full text-white opacity-0 group-hover:opacity-100 transition-all hover:bg-zafting-text hover:text-zafting-bg"
+          className="absolute bottom-4 inset-e-4 bg-white/20 backdrop-blur-md p-3 rounded-full text-white opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-all hover:bg-zafting-text hover:text-zafting-bg"
         >
           <Plus size={20} />
         </button>

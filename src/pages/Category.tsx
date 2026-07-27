@@ -313,10 +313,10 @@ export const Category: React.FC = () => {
                              <img src={product.image} alt={product.name} className="w-full h-full object-cover" />
                              
                              {/* Hover Overlay */}
-                             <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-center items-center text-white p-4 text-center backdrop-blur-[2px]">
-                                 <h4 className="font-serif text-2xl mb-2 translate-y-4 group-hover:translate-y-0 transition-transform duration-300">{product.name}</h4>
+                             <div className="absolute inset-0 bg-black/40 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-center items-center text-white p-4 text-center backdrop-blur-[2px]">
+                                 <h4 className="font-serif text-2xl mb-2 translate-y-0 md:translate-y-4 md:group-hover:translate-y-0 transition-transform duration-300">{product.name}</h4>
                                  <p className="text-lg font-medium mb-4">{formatPriceToman(product.price)}</p>
-                                 <button 
+                                 <button
                                     onClick={(e) => {
                                         e.stopPropagation();
                                         addToCart(product);

@@ -292,9 +292,10 @@ export const ProductDetail: React.FC = () => {
         
         {/* Left: Immersive Image & Interactive Triggers */}
         <div className="lg:w-1/2 h-[50vh] lg:h-screen relative overflow-hidden group sticky top-0">
-           <button 
+           <button
             onClick={() => navigate(-1)}
-            className="absolute top-6 start-6 z-20 w-12 h-12 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center text-white hover:bg-white hover:text-zafting-text transition-colors shadow-lg"
+            aria-label={t('common.back')}
+            className="absolute top-24 start-6 z-20 w-12 h-12 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center text-white hover:bg-white hover:text-zafting-text transition-colors shadow-lg"
            >
              <BackArrow size={24} />
            </button>

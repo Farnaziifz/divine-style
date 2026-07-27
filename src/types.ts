@@ -30,6 +30,7 @@ export interface Product {
   gallery?: string[]; // Array of images for 3D view
   video?: string; // URL to video
   category: string;
+  categoryId?: string;
   isFeatured?: boolean;
   reviews?: Review[];
   fabric?: {

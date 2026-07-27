@@ -1,21 +1,76 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Product } from '../types';
-import { PRODUCTS } from '../constants';
+import { fetchProductById, fetchProductList } from '../services/productApi';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useCart } from '../contexts/CartContext';
-import { ArrowLeft, ArrowRight, ShoppingBag } from 'lucide-react';
+import { ArrowLeft, ArrowRight, ShoppingBag, Loader2 } from 'lucide-react';
 import { formatPriceToman } from '../utils/format';
 
 export const StyleInspiration: React.FC = () => {
   const { id } = useParams<{ id: string }>();
-  const product = PRODUCTS.find(p => p.id === id);
   const navigate = useNavigate();
   const { addToCart } = useCart();
   const { t, direction, language } = useLanguage();
   const BackArrow = direction === 'rtl' ? ArrowRight : ArrowLeft;
 
-  if (!product) return <div>Product not found</div>;
+  const [product, setProduct] = useState<Product | null>(null);
+  const [relatedProducts, setRelatedProducts] = useState<Product[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!id) {
+      setIsLoading(false);
+      setError('Missing product id');
+      return;
+    }
+    let cancelled = false;
+    setError(null);
+    setProduct(null);
+    setIsLoading(true);
+    fetchProductById(id)
+      .then(async (p) => {
+        if (cancelled) return;
+        setProduct(p);
+        if (p.categoryId) {
+          const list = await fetchProductList({ categoryId: p.categoryId, limit: 6 }).catch(() => []);
+          if (!cancelled) setRelatedProducts(list.filter((r) => r.id !== p.id).slice(0, 5));
+        }
+      })
+      .catch((err) => {
+        if (!cancelled) setError(err instanceof Error ? err.message : 'Failed to load product');
+      })
+      .finally(() => {
+        if (!cancelled) setIsLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [id]);
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-zafting-bg flex items-center justify-center">
+        <Loader2 className="animate-spin text-zafting-text" size={48} />
+      </div>
+    );
+  }
+
+  if (error || !product) {
+    return (
+      <div className="min-h-screen bg-zafting-bg flex flex-col items-center justify-center p-8">
+        <p className="text-zafting-text/80 text-lg mb-4">{error || t('product.not_found')}</p>
+        <button
+          onClick={() => navigate(-1)}
+          className="flex items-center gap-2 bg-zafting-text text-zafting-bg px-6 py-3 rounded-full uppercase tracking-widest text-sm hover:scale-105 transition-transform"
+        >
+          <BackArrow size={18} />
+          {t('common.back')}
+        </button>
+      </div>
+    );
+  }
 
   // Mock Styling Looks (In a real app, this would come from the product object)
   const looks = [
@@ -39,24 +94,26 @@ export const StyleInspiration: React.FC = () => {
     }
   ];
 
-  // Filter related products (same category, excluding current)
-  const relatedProducts = PRODUCTS.filter(p => p.category === product.category && p.id !== product.id).slice(0, 5);
-
   return (
-    <div className="min-h-screen bg-[#E8E0D9] animate-fade-in relative">
-      
-      {/* Header */}
-      <div className="fixed top-0 w-full z-40 px-6 py-6 flex items-center justify-between mix-blend-difference text-[#E8E0D9]">
-          <button onClick={() => navigate(-1)} className="flex items-center gap-2 hover:opacity-70 transition-opacity">
-              <BackArrow size={24} /> <span className="uppercase tracking-widest text-sm">{t('style.back')}</span>
-          </button>
-          <h1 className="font-serif text-xl hidden md:block">{t('style.title')}</h1>
-          <div className="w-8"></div> {/* Spacer */}
-      </div>
+    <div className="min-h-screen bg-zafting-bg animate-fade-in relative">
 
       {/* Hero Video Section */}
       <section className="h-[80vh] w-full relative overflow-hidden">
-         <video 
+         {/* Back button + title: sits within the hero (not fixed) so it never
+             stacks with MainLayout's global fixed Navbar in the same corner. */}
+         <div className="absolute top-24 inset-x-6 z-20 flex items-center justify-between">
+             <button
+                onClick={() => navigate(-1)}
+                className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/20 backdrop-blur-md text-white hover:bg-white hover:text-zafting-text transition-colors"
+             >
+                 <BackArrow size={20} /> <span className="uppercase tracking-widest text-sm">{t('style.back')}</span>
+             </button>
+             <h1 className="font-serif text-xl hidden md:block px-4 py-2 rounded-full bg-white/20 backdrop-blur-md text-white">
+               {t('style.title')}
+             </h1>
+         </div>
+
+         <video
             src={product.video || 'https://videos.pexels.com/video-files/3205803/3205803-hd_1080_1920_25fps.mp4'} 
             className="w-full h-full object-cover filter brightness-75"
             autoPlay 
@@ -149,8 +206,8 @@ export const StyleInspiration: React.FC = () => {
                             <div className="relative w-full aspect-[2/3] bg-white shadow-xl rounded-lg overflow-hidden transform origin-top transition-all duration-500 ease-out group-hover:rotate-2 group-hover:scale-[1.02]">
                                 <img src={p.image} alt={p.name} className="w-full h-full object-cover" />
                                 
-                                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-center items-center text-white p-4 text-center backdrop-blur-[1px]">
-                                    <h4 className="font-serif text-xl mb-1 translate-y-4 group-hover:translate-y-0 transition-transform duration-300">{p.name}</h4>
+                                <div className="absolute inset-0 bg-black/40 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-center items-center text-white p-4 text-center backdrop-blur-[1px]">
+                                    <h4 className="font-serif text-xl mb-1 translate-y-0 md:translate-y-4 md:group-hover:translate-y-0 transition-transform duration-300">{p.name}</h4>
                                     <p className="text-sm opacity-80 mb-3">{formatPriceToman(p.price)}</p>
                                     <button className="p-2 bg-white text-black rounded-full hover:scale-110 transition-transform">
                                         <ShoppingBag size={16} />

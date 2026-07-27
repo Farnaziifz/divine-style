@@ -38,7 +38,7 @@ export const ProductGrid: React.FC<ProductGridProps> = ({ products, onAddToCart,
                     e.stopPropagation();
                     onAddToCart(product);
                 }}
-                className="absolute bottom-4 end-4 bg-white/20 backdrop-blur-md p-3 rounded-full text-white opacity-0 group-hover:opacity-100 transition-all hover:bg-zafting-text hover:text-[#E8E0D9]"
+                className="absolute bottom-4 end-4 bg-white/20 backdrop-blur-md p-3 rounded-full text-white opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-all hover:bg-zafting-text hover:text-[#E8E0D9]"
               >
                 <Plus size={20} />
               </button>
