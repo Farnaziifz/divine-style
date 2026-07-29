@@ -4,10 +4,10 @@ import { useLanguage } from '../contexts/LanguageContext';
 import contactImage from '../assets/images/contact-page/1.jpg';
 
 const CONTACT_INFO = {
-  phone: '+98 21 1234 5678',
+  phone: '0937 720 8888',
   email: 'hello@divinestyle.com',
-  addressFa: 'تهران، خیابان ولیعصر، مجتمع دیواین استایل',
-  addressEn: 'Valiasr St, Tehran, Iran',
+  addressFa: 'رودکی شمالی، بعد از دامپزشکی، کوچه ملک محمدی، پلاک ۴',
+  addressEn: 'North Roudaki St, after the veterinary clinic, Malek Mohammadi Alley, No. 4, Tehran, Iran',
   instagram: 'https://instagram.com',
   twitter: 'https://x.com',
   facebook: 'https://facebook.com',
@@ -88,7 +88,7 @@ export const Contact = () => {
                     <span className="text-sm">{isFa ? 'دفتر مرکزی' : 'Based in'}</span>
                   </div>
                   <p className="max-w-sm text-2xl font-medium leading-9 text-black">
-                    {isFa ? CONTACT_INFO.addressFa : 'Tehran, Iran'}
+                    {isFa ? CONTACT_INFO.addressFa : CONTACT_INFO.addressEn}
                   </p>
                 </div>
 
