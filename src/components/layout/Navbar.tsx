@@ -66,8 +66,8 @@ export const Navbar: React.FC = () => {
       <nav 
         className={`fixed top-0 start-0 w-full z-40 px-6 py-6 flex justify-between items-center transition-all duration-300 pointer-events-none ${
           isScrolled 
-            ? 'bg-zafting-bg/90 backdrop-blur-md shadow-sm py-4' 
-            : 'mix-blend-multiply'
+            ? 'bg-zafting-bg/90 backdrop-blur-md shadow-sm py-4'
+            : 'mix-blend-multiply drop-shadow-[0_1px_2px_rgba(0,0,0,0.15)]'
         }`}
       >
         <Link to={`/${language}`} className="pointer-events-auto text-xl tracking-widest font-sans font-medium text-zafting-text uppercase z-50">
@@ -83,14 +83,16 @@ export const Navbar: React.FC = () => {
             <span className="uppercase">{language === 'en' ? 'FA' : 'EN'}</span>
           </button>
 
-          <button 
+          <button
             onClick={handleAuthClick}
+            aria-label={t('nav.account')}
             className="text-zafting-text hover:opacity-70 transition-opacity"
           >
             <User size={20} strokeWidth={1.5} />
           </button>
-          <button 
+          <button
             onClick={() => setIsCartOpen(true)}
+            aria-label={t('cart.title')}
             className="text-zafting-text hover:opacity-70 transition-opacity relative"
           >
             <ShoppingBag size={20} strokeWidth={1.5} />
@@ -100,8 +102,9 @@ export const Navbar: React.FC = () => {
               </span>
             )}
           </button>
-          <button 
+          <button
             onClick={() => setIsMenuOpen(true)}
+            aria-label={t('nav.menu')}
             className="text-zafting-text hover:opacity-70 transition-opacity"
           >
             <Menu size={20} strokeWidth={1.5} />

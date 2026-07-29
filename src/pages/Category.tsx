@@ -49,6 +49,14 @@ export const Category: React.FC = () => {
   // Animation State
   const [animatingProduct, setAnimatingProduct] = useState<{ product: Product, rect: DOMRect } | null>(null);
 
+  type SortOption = 'newest' | 'price_asc' | 'price_desc';
+  const [sort, setSort] = useState<SortOption>('newest');
+  const [minPrice, setMinPrice] = useState<string>('');
+  const [maxPrice, setMaxPrice] = useState<string>('');
+  const [isSortOpen, setIsSortOpen] = useState(false);
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [priceDraft, setPriceDraft] = useState<{ min: string; max: string }>({ min: '', max: '' });
+
   const itemsPerPage = 5;
 
   const getImageUrl = (path?: string | null) => {
@@ -86,11 +94,17 @@ export const Category: React.FC = () => {
       if (!categoryId) return;
       setIsLoading(true);
       try {
+        const params = new URLSearchParams({
+          categoryId,
+          page: String(currentPage),
+          limit: String(itemsPerPage),
+          sort,
+        });
+        if (minPrice) params.set('minPrice', minPrice);
+        if (maxPrice) params.set('maxPrice', maxPrice);
         const [catRes, productsRes] = await Promise.all([
           fetch(`${apiBaseUrl}/categories/${categoryId}`),
-          fetch(
-            `${apiBaseUrl}/products?categoryId=${categoryId}&page=${currentPage}&limit=${itemsPerPage}`,
-          ),
+          fetch(`${apiBaseUrl}/products?${params.toString()}`),
         ]);
 
         if (catRes.ok) {
@@ -114,7 +128,7 @@ export const Category: React.FC = () => {
     };
 
     fetchCategoryAndProducts();
-  }, [apiBaseUrl, categoryId, currentPage]);
+  }, [apiBaseUrl, categoryId, currentPage, sort, minPrice, maxPrice]);
 
   const saleProducts = products.filter((p) => typeof p.discountPrice === 'number' && p.discountPrice < p.price);
   const regularProducts = products.filter((p) => !p.discountPrice || p.discountPrice >= p.price);
@@ -126,7 +140,7 @@ export const Category: React.FC = () => {
   const ArrowIcon = direction === 'rtl' ? ArrowLeft : ArrowRight;
   const BackArrowIcon = direction === 'rtl' ? ArrowRight : ArrowLeft;
 
-  const handleProductClick = (product: Product, e: React.MouseEvent<HTMLDivElement>) => {
+  const handleProductClick = (product: Product, e: React.SyntheticEvent<HTMLDivElement>) => {
       // 1. Get coordinates of clicked image
       const imgElement = e.currentTarget.querySelector('img');
       if (imgElement) {
@@ -211,12 +225,77 @@ export const Category: React.FC = () => {
         </div>
 
         <div className="flex gap-4">
-          <button className="flex items-center gap-2 px-6 py-3 border border-zafting-text/20 rounded-full hover:bg-zafting-text hover:text-[#E8E0D9] transition-colors">
-             <Filter size={16} /> <span className="text-sm uppercase">{t('cat.filter')}</span>
-          </button>
-          <button className="flex items-center gap-2 px-6 py-3 border border-zafting-text/20 rounded-full hover:bg-zafting-text hover:text-[#E8E0D9] transition-colors">
-             <SlidersHorizontal size={16} /> <span className="text-sm uppercase">{t('cat.sort')}</span>
-          </button>
+          <div className="relative">
+            <button
+              onClick={() => { setIsFilterOpen((v) => !v); setIsSortOpen(false); setPriceDraft({ min: minPrice, max: maxPrice }); }}
+              className="flex items-center gap-2 px-6 py-3 border border-zafting-text/20 rounded-full hover:bg-zafting-text hover:text-zafting-bg transition-colors cursor-pointer"
+            >
+               <Filter size={16} /> <span className="text-sm uppercase">{t('cat.filter')}</span>
+            </button>
+            {isFilterOpen && (
+              <div className="absolute top-full mt-2 end-0 z-30 w-64 bg-zafting-bg border border-zafting-text/15 rounded-2xl shadow-xl p-4">
+                <p className="text-xs uppercase tracking-widest opacity-60 mb-3">{t('cat.filter.price')}</p>
+                <div className="flex items-center gap-2 mb-4">
+                  <input
+                    type="number"
+                    min={0}
+                    inputMode="numeric"
+                    value={priceDraft.min}
+                    onChange={(e) => setPriceDraft((d) => ({ ...d, min: e.target.value }))}
+                    placeholder="0"
+                    className="w-full min-w-0 px-3 py-2 rounded-lg border border-zafting-text/20 bg-transparent text-sm"
+                  />
+                  <span className="opacity-50">–</span>
+                  <input
+                    type="number"
+                    min={0}
+                    inputMode="numeric"
+                    value={priceDraft.max}
+                    onChange={(e) => setPriceDraft((d) => ({ ...d, max: e.target.value }))}
+                    placeholder="∞"
+                    className="w-full min-w-0 px-3 py-2 rounded-lg border border-zafting-text/20 bg-transparent text-sm"
+                  />
+                </div>
+                <button
+                  onClick={() => {
+                    setMinPrice(priceDraft.min);
+                    setMaxPrice(priceDraft.max);
+                    setCurrentPage(1);
+                    setIsFilterOpen(false);
+                  }}
+                  className="w-full py-2 rounded-lg bg-zafting-text text-zafting-bg text-sm uppercase tracking-widest hover:opacity-90 transition-opacity cursor-pointer"
+                >
+                  {t('cat.filter')}
+                </button>
+              </div>
+            )}
+          </div>
+
+          <div className="relative">
+            <button
+              onClick={() => { setIsSortOpen((v) => !v); setIsFilterOpen(false); }}
+              className="flex items-center gap-2 px-6 py-3 border border-zafting-text/20 rounded-full hover:bg-zafting-text hover:text-zafting-bg transition-colors cursor-pointer"
+            >
+               <SlidersHorizontal size={16} /> <span className="text-sm uppercase">{t('cat.sort')}</span>
+            </button>
+            {isSortOpen && (
+              <div className="absolute top-full mt-2 end-0 z-30 w-56 bg-zafting-bg border border-zafting-text/15 rounded-2xl shadow-xl p-2">
+                {([
+                  ['newest', 'cat.sort.new'],
+                  ['price_asc', 'cat.sort.price_asc'],
+                  ['price_desc', 'cat.sort.price_desc'],
+                ] as [SortOption, string][]).map(([value, key]) => (
+                  <button
+                    key={value}
+                    onClick={() => { setSort(value); setCurrentPage(1); setIsSortOpen(false); }}
+                    className={`w-full text-start px-4 py-2 rounded-lg text-sm transition-colors cursor-pointer ${sort === value ? 'bg-zafting-text text-zafting-bg' : 'hover:bg-zafting-text/10'}`}
+                  >
+                    {t(key)}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
       </header>
 
@@ -229,9 +308,17 @@ export const Category: React.FC = () => {
            </div>
            
            <div className="bg-white/40 backdrop-blur-sm rounded-4xl p-8 flex flex-col md:flex-row gap-8 items-center border border-white/50">
-              <div 
-                className="w-full md:w-1/3 aspect-[3/4] relative rounded-xl overflow-hidden shadow-lg rotate-1 hover:rotate-0 transition-transform duration-500 cursor-pointer"
+              <div
+                role="button"
+                tabIndex={0}
+                className="w-full md:w-1/3 aspect-[3/4] relative rounded-xl overflow-hidden shadow-lg rotate-1 hover:rotate-0 transition-transform duration-500 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-zafting-text"
                 onClick={(e) => handleProductClick(featuredProduct, e)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    handleProductClick(featuredProduct, e);
+                  }
+                }}
               >
                   <img src={featuredProduct.image} alt={featuredProduct.name} className="w-full h-full object-cover" />
               </div>
@@ -300,10 +387,18 @@ export const Category: React.FC = () => {
                   </div>
                 ) : (
                 currentRackProducts.map((product) => (
-                    <div 
-                        key={product.id} 
-                        className="group relative w-[280px] flex flex-col items-center pt-8 cursor-pointer"
+                    <div
+                        key={product.id}
+                        role="button"
+                        tabIndex={0}
+                        className="group relative w-[280px] flex flex-col items-center pt-8 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-zafting-text rounded-lg"
                         onClick={(e) => handleProductClick(product, e)}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter' || e.key === ' ') {
+                            e.preventDefault();
+                            handleProductClick(product, e);
+                          }
+                        }}
                     >
                         {/* Hanger Hook Visual */}
                         <div className="absolute top-[-8px] w-4 h-8 border-t-4 border-l-4 border-r-4 border-gray-400 rounded-t-full z-10"></div>
@@ -351,10 +446,18 @@ export const Category: React.FC = () => {
 
              <div className="grid grid-cols-2 md:grid-cols-4 gap-6 relative z-10">
                  {saleProducts.map(product => (
-                     <div 
-                        key={product.id} 
-                        className="group cursor-pointer"
+                     <div
+                        key={product.id}
+                        role="button"
+                        tabIndex={0}
+                        className="group cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-white rounded-2xl"
                         onClick={(e) => handleProductClick(product, e)}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter' || e.key === ' ') {
+                            e.preventDefault();
+                            handleProductClick(product, e);
+                          }
+                        }}
                      >
                          <div className="relative aspect-square bg-white/10 rounded-2xl overflow-hidden mb-4 border border-white/10">
                              <img src={product.image} alt={product.name} className="w-full h-full object-cover mix-blend-overlay group-hover:mix-blend-normal transition-all duration-300" />

@@ -194,10 +194,18 @@ export const StyleInspiration: React.FC = () => {
              <div className="overflow-x-auto pb-12 pt-8 px-6 [&::-webkit-scrollbar]:hidden" style={{ scrollbarWidth: 'none' }}>
                 <div className="flex justify-center gap-8 min-w-max">
                     {relatedProducts.map((p) => (
-                        <div 
-                            key={p.id} 
-                            className="group relative w-[220px] flex flex-col items-center cursor-pointer pt-6"
+                        <div
+                            key={p.id}
+                            role="button"
+                            tabIndex={0}
+                            className="group relative w-[220px] flex flex-col items-center cursor-pointer pt-6 focus:outline-none focus-visible:ring-2 focus-visible:ring-zafting-text rounded-lg"
                             onClick={() => navigate(`/${language}/product/${p.id}`)}
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter' || e.key === ' ') {
+                                e.preventDefault();
+                                navigate(`/${language}/product/${p.id}`);
+                              }
+                            }}
                         >
                             {/* Hanger Hook Visual */}
                             <div className="absolute top-[-10px] w-4 h-8 border-t-4 border-l-4 border-r-4 border-gray-400 rounded-t-full z-10"></div>

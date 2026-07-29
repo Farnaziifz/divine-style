@@ -144,6 +144,7 @@ export const DashboardAddresses: React.FC = () => {
   };
 
   const removeAddress = async (id: string) => {
+    if (!window.confirm(t('profile.address.confirmDelete'))) return;
     setBusy(true);
     try {
       const updated = await userService.deleteMyAddress(id);
@@ -216,10 +217,12 @@ export const DashboardAddresses: React.FC = () => {
                         <button
                           type="button"
                           onClick={() => setDefault(a.id)}
-                          className={`w-4 h-4 rounded-full border ${a.isDefault ? 'bg-zafting-text border-zafting-text' : 'border-zafting-text/30'}`}
+                          className="p-3 -m-3 rounded-full"
                           aria-label="set-default-address"
                           disabled={busy}
-                        />
+                        >
+                          <span className={`block w-4 h-4 rounded-full border ${a.isDefault ? 'bg-zafting-text border-zafting-text' : 'border-zafting-text/30'}`} />
+                        </button>
                         <p className="font-sans text-sm text-zafting-text/80 truncate">
                           {a.province} - {a.city}
                         </p>
@@ -277,7 +280,7 @@ export const DashboardAddresses: React.FC = () => {
           <div className="relative w-full max-w-2xl bg-zafting-bg border border-white rounded-2xl shadow-2xl p-6">
             <div className="flex items-center justify-between mb-5">
               <h3 className="font-serif text-xl text-zafting-text">
-                {editingAddressId ? t('profile.address.save') : t('profile.address.addNew')}
+                {editingAddressId ? t('profile.address.edit') : t('profile.address.addNew')}
               </h3>
               <button
                 type="button"

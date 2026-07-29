@@ -1,3 +1,5 @@
+import { useLanguage } from '../../contexts/LanguageContext';
+
 interface Props {
   page: number;
   total: number;
@@ -6,6 +8,7 @@ interface Props {
 }
 
 export const Pagination = ({ page, total, limit, onPageChange }: Props) => {
+  const { language } = useLanguage();
   const lastPage = Math.max(1, Math.ceil(total / limit));
   const canPrev = page > 1;
   const canNext = page < lastPage;
@@ -20,15 +23,15 @@ export const Pagination = ({ page, total, limit, onPageChange }: Props) => {
       <button
         onClick={() => onPageChange(page - 1)}
         disabled={!canPrev}
-        className="px-3 py-1.5 rounded-lg border border-gray-200 hover:bg-gray-50 disabled:opacity-50"
+        className="min-h-11 px-4 flex items-center justify-center rounded-lg border border-gray-200 hover:bg-gray-50 disabled:opacity-50"
       >
-        قبلی
+        {language === 'fa' ? 'قبلی' : 'Previous'}
       </button>
       {numbers.map((n) => (
         <button
           key={n}
           onClick={() => onPageChange(n)}
-          className={`px-3 py-1.5 rounded-lg border ${
+          className={`min-h-11 min-w-11 px-3 flex items-center justify-center rounded-lg border ${
             n === page
               ? 'bg-zafting-accent text-white border-zafting-accent'
               : 'border-gray-200 hover:bg-gray-50'
@@ -40,11 +43,10 @@ export const Pagination = ({ page, total, limit, onPageChange }: Props) => {
       <button
         onClick={() => onPageChange(page + 1)}
         disabled={!canNext}
-        className="px-3 py-1.5 rounded-lg border border-gray-200 hover:bg-gray-50 disabled:opacity-50"
+        className="min-h-11 px-4 flex items-center justify-center rounded-lg border border-gray-200 hover:bg-gray-50 disabled:opacity-50"
       >
-        بعدی
+        {language === 'fa' ? 'بعدی' : 'Next'}
       </button>
     </div>
   );
 };
-

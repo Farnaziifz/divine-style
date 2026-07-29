@@ -15,7 +15,9 @@ export const PaymentResult: React.FC = () => {
   const [order, setOrder] = useState<OrderDetailsDto | null>(null);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(true);
+  const [timedOut, setTimedOut] = useState(false);
   const refreshCount = useRef(0);
+  const [manualRetryKey, setManualRetryKey] = useState(0);
 
   useEffect(() => {
     if (!orderCode) return;
@@ -30,9 +32,13 @@ export const PaymentResult: React.FC = () => {
         setLoading(false);
 
         const isFinal = data.paymentStatus === 'PAID' || data.paymentStatus === 'FAILED';
-        if (!isFinal && refreshCount.current < MAX_REFRESHES) {
-          refreshCount.current += 1;
-          timer = window.setTimeout(load, REFRESH_INTERVAL_MS);
+        if (!isFinal) {
+          if (refreshCount.current < MAX_REFRESHES) {
+            refreshCount.current += 1;
+            timer = window.setTimeout(load, REFRESH_INTERVAL_MS);
+          } else {
+            setTimedOut(true);
+          }
         }
       } catch {
         if (cancelled) return;
@@ -47,7 +53,13 @@ export const PaymentResult: React.FC = () => {
       if (timer) window.clearTimeout(timer);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [orderCode]);
+  }, [orderCode, manualRetryKey]);
+
+  const handleCheckAgain = () => {
+    refreshCount.current = 0;
+    setTimedOut(false);
+    setManualRetryKey((k) => k + 1);
+  };
 
   const isSuccess = order?.paymentStatus === 'PAID';
   const isFailed = order?.paymentStatus === 'FAILED';
@@ -81,7 +93,7 @@ export const PaymentResult: React.FC = () => {
             </>
           )}
 
-          {order && isPending && (
+          {order && isPending && !timedOut && (
             <>
               <div className="w-10 h-10 border-2 border-zafting-text/20 border-t-zafting-text rounded-full animate-spin mx-auto mb-4" />
               <h1 className="font-serif text-2xl md:text-3xl text-zafting-text mb-2">
@@ -90,6 +102,34 @@ export const PaymentResult: React.FC = () => {
               <p className="font-sans text-sm text-zafting-text/60 dir-ltr">
                 {t('payment.orderCode')}: {order.orderCode}
               </p>
+            </>
+          )}
+
+          {order && isPending && timedOut && (
+            <>
+              <h1 className="font-serif text-2xl md:text-3xl text-zafting-text mb-2">
+                {t('payment.pending.timeout.title')}
+              </h1>
+              <p className="font-sans text-sm text-zafting-text/70 max-w-md mx-auto mb-2">
+                {t('payment.pending.timeout.subtitle')}
+              </p>
+              <p className="font-sans text-sm text-zafting-text/60 dir-ltr mb-6">
+                {t('payment.orderCode')}: {order.orderCode}
+              </p>
+              <div className="flex gap-3 justify-center">
+                <button
+                  onClick={handleCheckAgain}
+                  className="font-sans px-6 py-3 rounded-xl text-sm font-medium bg-zafting-text text-white hover:opacity-90 transition-opacity cursor-pointer"
+                >
+                  {t('payment.checkAgain')}
+                </button>
+                <Link
+                  to={`/${language}/dashboard/orders`}
+                  className="font-sans px-6 py-3 rounded-xl text-sm font-medium border border-zafting-text/20 hover:bg-zafting-text/5 transition-colors"
+                >
+                  {t('payment.goToOrders')}
+                </Link>
+              </div>
             </>
           )}
 

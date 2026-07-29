@@ -105,6 +105,18 @@ export const Auth: React.FC = () => {
     }
   };
 
+  const handleOtpPaste = (e: React.ClipboardEvent<HTMLInputElement>) => {
+    const pasted = toEnglishDigits(e.clipboardData.getData('text')).replace(/\D/g, '');
+    if (!pasted) return;
+    e.preventDefault();
+    const digits = pasted.slice(0, OTP_LENGTH).split('');
+    const newOtp = Array(OTP_LENGTH).fill('');
+    digits.forEach((d, i) => { newOtp[i] = d; });
+    setOtp(newOtp);
+    const nextIndex = Math.min(digits.length, OTP_LENGTH - 1);
+    inputRefs.current[nextIndex]?.focus();
+  };
+
   const handleResendOtp = async () => {
     if (countdown > 0) return;
     setError('');
@@ -176,6 +188,7 @@ export const Auth: React.FC = () => {
       <div className="w-full max-w-5xl h-[85vh] bg-[#E8E0D9] rounded-[3rem] shadow-2xl flex overflow-hidden relative animate-fade-in border border-white/40">
         <button
           onClick={() => navigate(`/${language}`)}
+          aria-label={t('common.close')}
           className="absolute top-8 end-8 z-20 w-10 h-10 rounded-full border border-zafting-text/20 flex items-center justify-center text-zafting-text hover:bg-zafting-text hover:text-white transition-colors"
         >
           <X size={20} />
@@ -204,6 +217,8 @@ export const Auth: React.FC = () => {
                   </label>
                   <input
                     type="tel"
+                    inputMode="numeric"
+                    autoComplete="tel"
                     value={phoneNumber}
                     onChange={handlePhoneChange}
                     placeholder={language === 'fa' ? '۰۹۱۲۳۴۵۶۷۸۹' : t('auth.login.placeholder')}
@@ -280,10 +295,13 @@ export const Auth: React.FC = () => {
                           ref={(el) => { inputRefs.current[idx] = el; }}
                           type="text"
                           inputMode="numeric"
+                          autoComplete={idx === 0 ? 'one-time-code' : 'off'}
                           maxLength={1}
                           value={digit}
                           onChange={(e) => handleOtpChange(idx, e.target.value)}
                           onKeyDown={(e) => handleOtpKeyDown(idx, e)}
+                          onPaste={handleOtpPaste}
+                          aria-label={`${t('auth.otp.digit')} ${idx + 1}`}
                           className="w-12 h-14 rounded-xl border border-zafting-text/20 bg-white/60 text-center text-2xl font-serif focus:outline-none focus:ring-2 focus:ring-zafting-text"
                         />
                       ))}
@@ -295,6 +313,7 @@ export const Auth: React.FC = () => {
                       </label>
                       <input
                         type="password"
+                        autoComplete="current-password"
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
                         className="w-full bg-white/50 border-b-2 border-zafting-text/20 py-4 px-2 text-lg focus:outline-none focus:border-zafting-text"

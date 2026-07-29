@@ -52,15 +52,19 @@ export const ReviewsSection: React.FC<ReviewsSectionProps> = ({ initialReviews =
         <form onSubmit={handleSubmit} className="bg-white/40 p-6 rounded-2xl mb-8 animate-fade-in border border-white">
            <div className="mb-4">
                <label className="font-sans block text-xs uppercase tracking-widest mb-2 font-bold opacity-60">{t('reviews.stars')}</label>
-               <div className="flex gap-1 text-yellow-500 cursor-pointer">
+               <div role="radiogroup" aria-label={t('reviews.stars')} className="flex gap-1 text-yellow-500">
                    {[1, 2, 3, 4, 5].map((star) => (
-                       <Star 
-                        key={star} 
-                        size={24} 
-                        fill={star <= newRating ? 'currentColor' : 'none'} 
+                       <button
+                        key={star}
+                        type="button"
+                        role="radio"
+                        aria-checked={star === newRating}
+                        aria-label={`${star} ${t('reviews.stars')}`}
                         onClick={() => setNewRating(star)}
-                        className="hover:scale-110 transition-transform"
-                       />
+                        className="cursor-pointer hover:scale-110 transition-transform focus:outline-none focus-visible:ring-2 focus-visible:ring-zafting-text rounded"
+                       >
+                         <Star size={24} fill={star <= newRating ? 'currentColor' : 'none'} />
+                       </button>
                    ))}
                </div>
            </div>

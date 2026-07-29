@@ -41,12 +41,22 @@ export const Contact = () => {
             <div className="space-y-7">
               <div className="border-b border-black/70 pb-3">
                 <p className="text-base text-black/70">{isFa ? 'شماره تلفن' : 'Phone'}</p>
-                <p className="mt-1 text-2xl font-medium text-black">{CONTACT_INFO.phone}</p>
+                <a
+                  href={`tel:${CONTACT_INFO.phone.replace(/\s+/g, '')}`}
+                  className="mt-1 block text-2xl font-medium text-black hover:opacity-70 transition-opacity dir-ltr"
+                >
+                  {CONTACT_INFO.phone}
+                </a>
               </div>
 
               <div className="border-b border-black/70 pb-3">
                 <p className="text-base text-black/70">{isFa ? 'ایمیل' : 'E-mail'}</p>
-                <p className="mt-1 text-2xl font-medium text-black">{CONTACT_INFO.email}</p>
+                <a
+                  href={`mailto:${CONTACT_INFO.email}`}
+                  className="mt-1 block text-2xl font-medium text-black hover:opacity-70 transition-opacity"
+                >
+                  {CONTACT_INFO.email}
+                </a>
               </div>
 
               <div className="border-b border-black/70 pb-3">
@@ -64,7 +74,12 @@ export const Contact = () => {
                     <Phone size={18} />
                     <span className="text-sm">{isFa ? 'تماس مستقیم' : 'Direct Line'}</span>
                   </div>
-                  <p className="text-3xl font-semibold text-black">{CONTACT_INFO.phone}</p>
+                  <a
+                    href={`tel:${CONTACT_INFO.phone.replace(/\s+/g, '')}`}
+                    className="block text-3xl font-semibold text-black hover:opacity-70 transition-opacity dir-ltr"
+                  >
+                    {CONTACT_INFO.phone}
+                  </a>
                 </div>
 
                 <div className="space-y-2">
@@ -82,18 +97,23 @@ export const Contact = () => {
                     <Mail size={18} />
                     <span className="text-sm">{isFa ? 'پشتیبانی' : 'Support'}</span>
                   </div>
-                  <p className="text-xl font-medium text-black">{CONTACT_INFO.email}</p>
+                  <a
+                    href={`mailto:${CONTACT_INFO.email}`}
+                    className="block text-xl font-medium text-black hover:opacity-70 transition-opacity"
+                  >
+                    {CONTACT_INFO.email}
+                  </a>
                 </div>
               </div>
 
               <div className="mt-10 flex items-center gap-6">
-                <a href={CONTACT_INFO.facebook} target="_blank" rel="noreferrer" className="text-black transition-opacity hover:opacity-60">
+                <a href={CONTACT_INFO.facebook} target="_blank" rel="noreferrer" aria-label="Facebook" className="text-black transition-opacity hover:opacity-60">
                   <Facebook size={24} />
                 </a>
-                <a href={CONTACT_INFO.instagram} target="_blank" rel="noreferrer" className="text-black transition-opacity hover:opacity-60">
+                <a href={CONTACT_INFO.instagram} target="_blank" rel="noreferrer" aria-label="Instagram" className="text-black transition-opacity hover:opacity-60">
                   <Instagram size={24} />
                 </a>
-                <a href={CONTACT_INFO.twitter} target="_blank" rel="noreferrer" className="text-black transition-opacity hover:opacity-60">
+                <a href={CONTACT_INFO.twitter} target="_blank" rel="noreferrer" aria-label="Twitter" className="text-black transition-opacity hover:opacity-60">
                   <Twitter size={24} />
                 </a>
               </div>

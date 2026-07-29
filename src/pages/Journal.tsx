@@ -85,9 +85,13 @@ export const Journal = () => {
   return (
     <div className="mx-auto max-w-7xl px-4 pb-16 pt-24 sm:px-6 lg:px-10">
       <div className="mb-9 space-y-3">
-        <h1 className="font-serif text-4xl text-zafting-text md:text-5xl">مجله مد.</h1>
+        <h1 className="font-serif text-4xl text-zafting-text md:text-5xl">
+          {language === 'fa' ? 'مجله مد.' : 'Fashion Journal.'}
+        </h1>
         <p className="max-w-xl text-sm leading-7 text-zafting-text/70 md:text-base">
-          جدیدترین و بهترین مقاله‌های سبک زندگی و مد که توسط تیم تحریریه انتخاب شده‌اند.
+          {language === 'fa'
+            ? 'جدیدترین و بهترین مقاله‌های سبک زندگی و مد که توسط تیم تحریریه انتخاب شده‌اند.'
+            : 'The latest lifestyle and fashion stories, curated by our editorial team.'}
         </p>
       </div>
 
@@ -101,7 +105,7 @@ export const Journal = () => {
               : 'border-zafting-text/20 text-zafting-text hover:bg-zafting-text/5'
           }`}
         >
-          همه
+          {language === 'fa' ? 'همه' : 'All'}
         </button>
         {categories.map((c: BlogCategory) => (
           <button
@@ -121,9 +125,13 @@ export const Journal = () => {
       {/* Grid */}
       <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:auto-rows-[170px] lg:grid-cols-4">
         {loading ? (
-          <div className="col-span-full py-16 text-center text-zafting-text/60">در حال بارگذاری...</div>
+          <div className="col-span-full py-16 text-center text-zafting-text/60">
+            {language === 'fa' ? 'در حال بارگذاری...' : 'Loading...'}
+          </div>
         ) : cards.length === 0 ? (
-          <div className="col-span-full py-16 text-center text-zafting-text/60">مطلبی یافت نشد</div>
+          <div className="col-span-full py-16 text-center text-zafting-text/60">
+            {language === 'fa' ? 'مطلبی یافت نشد' : 'No posts found'}
+          </div>
         ) : (
           <>
             {cards.map((p: BlogPost, idx: number) => {

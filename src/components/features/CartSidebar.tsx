@@ -1,5 +1,5 @@
 import React from 'react';
-import { X, ArrowRight, ArrowLeft, Plus, Minus } from 'lucide-react';
+import { X, ArrowRight, ArrowLeft, Plus, Minus, ShoppingBag } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useCart } from '../../contexts/CartContext';
 import { useLanguage } from '../../contexts/LanguageContext';
@@ -22,14 +22,29 @@ export const CartSidebar: React.FC = () => {
       <div className="relative w-full max-w-md bg-[#E8E0D9] h-full shadow-2xl p-8 flex flex-col transform transition-transform duration-300 animate-slide-in">
         <div className="flex justify-between items-center mb-8 border-b border-zafting-text/10 pb-4">
           <h2 className="font-serif text-3xl">{t('cart.title')}</h2>
-          <button onClick={() => setIsCartOpen(false)}>
+          <button onClick={() => setIsCartOpen(false)} aria-label={t('common.close')}>
             <X size={24} />
           </button>
         </div>
 
         <div className="flex-1 overflow-y-auto space-y-6">
           {cart.length === 0 ? (
-            <p className="font-sans text-center text-zafting-text/50 mt-10">{t('cart.empty')}</p>
+            <div className="flex flex-col items-center text-center mt-10">
+              <div className="w-16 h-16 rounded-full bg-zafting-text/5 flex items-center justify-center mb-4">
+                <ShoppingBag size={28} className="text-zafting-text/40" />
+              </div>
+              <p className="font-sans text-zafting-text/50 mb-6">{t('cart.empty')}</p>
+              <button
+                type="button"
+                onClick={() => {
+                  setIsCartOpen(false);
+                  navigate(`/${language}/shop`);
+                }}
+                className="font-sans px-6 py-3 rounded-full bg-zafting-text text-zafting-bg text-sm uppercase tracking-widest hover:opacity-90 transition-opacity cursor-pointer"
+              >
+                {t('cart.emptyCta')}
+              </button>
+            </div>
           ) : (
             cart.map(item => (
               <div key={item.id} className="flex gap-4">
@@ -64,10 +79,10 @@ export const CartSidebar: React.FC = () => {
                     </div>
                   </div>
                 </div>
-                <button 
+                <button
                   onClick={() => removeFromCart(item.id)}
-                  className="self-start text-red-500 hover:text-red-700"
-                  title={t('cart.remove')}
+                  className="self-start p-2.5 -m-2.5 text-red-500 hover:text-red-700 rounded-full"
+                  aria-label={t('cart.remove')}
                 >
                   <X size={16} />
                 </button>

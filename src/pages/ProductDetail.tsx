@@ -52,7 +52,9 @@ export const ProductDetail: React.FC = () => {
   const handleShoppingListClick = async () => {
     if (!product) return;
     if (!isAuthenticated) {
-      navigate(`/${lang || language}/auth`);
+      const currentLang = lang || language;
+      const next = encodeURIComponent(`/${currentLang}/product/${product.id}`);
+      navigate(`/${currentLang}/auth?next=${next}`);
       return;
     }
     setLoadingShoppingList(true);
@@ -76,6 +78,18 @@ export const ProductDetail: React.FC = () => {
       setGalleryRotateY(0);
     }
   }, [isGalleryOpen]);
+
+  useEffect(() => {
+    if (!isGalleryOpen && !isVideoOpen) return;
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setIsGalleryOpen(false);
+        setIsVideoOpen(false);
+      }
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [isGalleryOpen, isVideoOpen]);
 
   useEffect(() => {
     if (!product?.variants?.length || !selectedSize) return;
@@ -201,8 +215,9 @@ export const ProductDetail: React.FC = () => {
       {/* 3D Gallery Overlay */}
       {isGalleryOpen && (
           <div className="fixed inset-0 z-50 bg-black/90 backdrop-blur-xl flex flex-col items-center justify-center overflow-hidden perspective-1000">
-             <button 
+             <button
                 onClick={() => setIsGalleryOpen(false)}
+                aria-label={t('common.close')}
                 className="absolute top-8 end-8 text-white hover:text-red-400 z-50"
              >
                  <X size={32} />
@@ -263,8 +278,9 @@ export const ProductDetail: React.FC = () => {
       {/* Video Overlay */}
       {isVideoOpen && (
           <div className="fixed inset-0 z-50 bg-black flex items-center justify-center p-4">
-              <button 
+              <button
                 onClick={() => setIsVideoOpen(false)}
+                aria-label={t('common.close')}
                 className="absolute top-8 end-8 text-white hover:text-red-400 z-50"
              >
                  <X size={32} />
@@ -331,20 +347,26 @@ export const ProductDetail: React.FC = () => {
 
         {/* Right: Details */}
         <div className="lg:w-1/2 overflow-y-auto lg:h-screen bg-[#E8E0D9]">
-          <div className="p-8 md:p-16 flex flex-col justify-center min-h-full">
+          <div className="p-8 md:p-16 pb-28 lg:pb-16 flex flex-col justify-center min-h-full">
             <div className="max-w-xl mx-auto w-full">
               
               {/* Breadcrumb / Rating */}
               <div className="flex items-center gap-2 mb-4 text-zafting-text/60 text-sm uppercase tracking-widest">
                   <span>{t(`product.category.${product.category}`) || product.category}</span>
-                  <span>•</span>
-                  <div className="flex text-yellow-600">
-                    <Star size={12} fill="currentColor" />
-                    <Star size={12} fill="currentColor" />
-                    <Star size={12} fill="currentColor" />
-                    <Star size={12} fill="currentColor" />
-                    <Star size={12} fill="currentColor" />
-                  </div>
+                  {product.reviews && product.reviews.length > 0 && (
+                    <>
+                      <span>•</span>
+                      <div className="flex text-yellow-600">
+                        {(() => {
+                          const avg = product.reviews.reduce((sum, r) => sum + r.rating, 0) / product.reviews.length;
+                          const rounded = Math.round(avg);
+                          return [1, 2, 3, 4, 5].map((i) => (
+                            <Star key={i} size={12} fill={i <= rounded ? 'currentColor' : 'none'} />
+                          ));
+                        })()}
+                      </div>
+                    </>
+                  )}
               </div>
 
               {/* Title & Price */}
@@ -437,7 +459,15 @@ export const ProductDetail: React.FC = () => {
                 <div className="mb-10">
                    <div className="flex justify-between items-center mb-4">
                         <h3 className="font-sans uppercase text-sm tracking-widest font-bold text-zafting-text/80">{t('product.select_size')}</h3>
-                        <span className="text-xs underline cursor-pointer hover:text-zafting-accent">Size Guide</span>
+                        {product.sizes?.some((s) => s.dims || s.specifications) && (
+                          <button
+                            type="button"
+                            onClick={() => document.getElementById('size-guide-chart')?.scrollIntoView({ behavior: 'smooth', block: 'center' })}
+                            className="text-xs underline cursor-pointer hover:text-zafting-accent"
+                          >
+                            {t('product.size_guide')}
+                          </button>
+                        )}
                    </div>
                    
                    <div className="flex flex-wrap gap-3">
@@ -486,7 +516,7 @@ export const ProductDetail: React.FC = () => {
 
               {/* Dynamic Measurement Chart — مقادیر بر اساس سایز + رنگ انتخاب‌شده به‌روز می‌شوند */}
               {(currentSizeData || currentVariant) && (
-                  <div className="mb-12 bg-white/30 rounded-2xl p-6 border border-white/50 transition-all duration-300" key={`${selectedSize}-${selectedColor}`}>
+                  <div id="size-guide-chart" className="mb-12 bg-white/30 rounded-2xl p-6 border border-white/50 transition-all duration-300" key={`${selectedSize}-${selectedColor}`}>
                       <div className="flex items-center gap-2 mb-4 text-zafting-text/60">
                            <Ruler size={16} />
                            <span className="text-xs uppercase tracking-widest font-bold">
@@ -573,6 +603,31 @@ export const ProductDetail: React.FC = () => {
           </div>
         </div>
 
+      </div>
+
+      {/* نوار خرید چسبان موبایل — CTA اصلی خرید همیشه در دسترس بمونه، حتی وسط اسکرول توضیحات بلند */}
+      <div className="lg:hidden fixed bottom-0 inset-x-0 z-40 bg-zafting-bg/95 backdrop-blur-md border-t border-zafting-text/10 px-4 py-3 flex items-center gap-3 shadow-[0_-4px_20px_rgba(0,0,0,0.06)]">
+        <div className="flex flex-col leading-tight min-w-0">
+          {currentVariant ? (
+            currentVariant.discountPrice != null && currentVariant.discountPrice < currentVariant.price ? (
+              <span className="font-medium text-zafting-text truncate">{formatPriceToman(currentVariant.discountPrice)}</span>
+            ) : (
+              <span className="font-medium text-zafting-text truncate">{formatPriceToman(currentVariant.price)}</span>
+            )
+          ) : product.discountPrice ? (
+            <span className="font-medium text-zafting-text truncate">{formatPriceToman(product.discountPrice)}</span>
+          ) : (
+            <span className="font-medium text-zafting-text truncate">{formatPriceToman(product.price)}</span>
+          )}
+        </div>
+        <button
+          type="button"
+          onClick={() => addToCart({ ...product, selectedSize, selectedColor: selectedColor || undefined })}
+          className="flex-1 bg-zafting-text text-zafting-bg py-3 px-6 rounded-full uppercase tracking-widest text-sm font-medium hover:opacity-95 transition-opacity flex items-center justify-center gap-2 shadow-lg"
+        >
+          <ShoppingBag size={18} />
+          {t('shop.btn.buy')}
+        </button>
       </div>
     </div>
   );

@@ -482,7 +482,7 @@ export const DirectChat: React.FC<{
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && sendText()}
             placeholder={language === 'fa' ? 'پیام شما...' : 'Your message...'}
-            className="flex-1 bg-transparent outline-none text-sm text-zafting-text placeholder:text-zafting-text/40"
+            className="flex-1 bg-transparent outline-none text-sm text-zafting-text placeholder:text-zafting-text/40 focus-visible:ring-2 focus-visible:ring-zafting-text rounded"
           />
           )}
           {!isRecording ? (

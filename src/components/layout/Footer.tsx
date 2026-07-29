@@ -94,13 +94,13 @@ export const Footer: React.FC = () => {
         {/* Middle Section: Socials & Copyright */}
         <div className="flex flex-col md:flex-row justify-between items-center gap-6 border-t border-zafting-bg/10 pt-8 mb-12">
           <div className="flex items-center gap-6">
-            <a href="#" className="text-zafting-bg/60 hover:text-zafting-bg transition-colors hover:-translate-y-1 transform duration-300">
+            <a href="#" aria-label="Instagram" className="text-zafting-bg/60 hover:text-zafting-bg transition-colors hover:-translate-y-1 transform duration-300">
               <Instagram size={20} strokeWidth={1.5} />
             </a>
-            <a href="#" className="text-zafting-bg/60 hover:text-zafting-bg transition-colors hover:-translate-y-1 transform duration-300">
+            <a href="#" aria-label="Twitter" className="text-zafting-bg/60 hover:text-zafting-bg transition-colors hover:-translate-y-1 transform duration-300">
               <Twitter size={20} strokeWidth={1.5} />
             </a>
-            <a href="#" className="text-zafting-bg/60 hover:text-zafting-bg transition-colors hover:-translate-y-1 transform duration-300">
+            <a href="#" aria-label="Facebook" className="text-zafting-bg/60 hover:text-zafting-bg transition-colors hover:-translate-y-1 transform duration-300">
               <Facebook size={20} strokeWidth={1.5} />
             </a>
             <a

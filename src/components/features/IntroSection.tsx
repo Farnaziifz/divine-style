@@ -97,7 +97,7 @@ export const IntroSection: React.FC<IntroSectionProps> = ({
             type="button"
             onClick={() => scroll('prev')}
             className="w-12 h-12 rounded-full border border-zafting-text/30 flex items-center justify-center text-zafting-text hover:bg-zafting-text hover:text-zafting-bg transition-colors"
-            aria-label="قبلی"
+            aria-label={t('common.prev')}
           >
             <ArrowPrev size={20} />
           </button>
@@ -105,7 +105,7 @@ export const IntroSection: React.FC<IntroSectionProps> = ({
             type="button"
             onClick={() => scroll('next')}
             className="w-12 h-12 rounded-full border border-zafting-text/30 flex items-center justify-center text-zafting-text hover:bg-zafting-text hover:text-zafting-bg transition-colors"
-            aria-label="بعدی"
+            aria-label={t('common.next')}
           >
             <ArrowNext size={20} />
           </button>

@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Minus, Plus, X } from 'lucide-react';
 import api from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
 import { useCart } from '../contexts/CartContext';
@@ -50,7 +51,8 @@ export const Checkout: React.FC = () => {
 
   useEffect(() => {
     if (!isAuthenticated) {
-      navigate(`/${language}/auth`, { replace: true });
+      const next = encodeURIComponent(`/${language}/checkout`);
+      navigate(`/${language}/auth?next=${next}`, { replace: true });
     }
   }, [isAuthenticated, language, navigate]);
 
@@ -255,7 +257,7 @@ export const Checkout: React.FC = () => {
                             className="w-8 h-8 flex items-center justify-center rounded-full border border-zafting-text/20 hover:bg-zafting-text/5 transition-colors"
                             aria-label="decrease-qty"
                           >
-                            -
+                            <Minus size={14} />
                           </button>
                           <span className="font-sans text-xs opacity-60 min-w-10 text-center">
                             {t('cart.qty')}: {item.quantity}
@@ -266,7 +268,7 @@ export const Checkout: React.FC = () => {
                             className="w-8 h-8 flex items-center justify-center rounded-full border border-zafting-text/20 hover:bg-zafting-text/5 transition-colors"
                             aria-label="increase-qty"
                           >
-                            +
+                            <Plus size={14} />
                           </button>
                         </div>
                       </div>
@@ -274,10 +276,10 @@ export const Checkout: React.FC = () => {
                     <button
                       type="button"
                       onClick={() => removeFromCart(item.id)}
-                      className="self-start text-red-500 hover:text-red-700"
-                      title={t('cart.remove')}
+                      className="self-start p-2.5 -m-2.5 text-red-500 hover:text-red-700 rounded-full"
+                      aria-label={t('cart.remove')}
                     >
-                      ×
+                      <X size={16} />
                     </button>
                   </div>
                 ))}
@@ -442,11 +444,12 @@ export const Checkout: React.FC = () => {
           </div>
 
           <div className="mt-6">
-            <label className="font-sans text-sm text-zafting-text/70 block mb-2">
+            <label htmlFor="discount-code" className="font-sans text-sm text-zafting-text/70 block mb-2">
               {t('checkout.discountCode')}
             </label>
             <div className="flex gap-2">
               <input
+                id="discount-code"
                 value={discountCode}
                 onChange={(e) => setDiscountCode(e.target.value)}
                 className="font-sans flex-1 px-4 py-3 rounded-xl border border-zafting-text/20 bg-white/50 focus:outline-none focus:ring-2 focus:ring-zafting-text/30 focus:border-zafting-text dir-ltr"
@@ -475,6 +478,15 @@ export const Checkout: React.FC = () => {
           >
             {checkingOut ? (language === 'fa' ? 'در حال ثبت...' : 'Processing...') : t('checkout.pay')}
           </button>
+          {!canPay && !checkingOut && (
+            <p className="font-sans text-xs text-zafting-text/60 mt-2 text-center">
+              {!selectedAddressId
+                ? t('checkout.selectAddress')
+                : !selectedShippingMethodId
+                ? t('checkout.selectShipping')
+                : null}
+            </p>
+          )}
         </aside>
       </div>
     </div>

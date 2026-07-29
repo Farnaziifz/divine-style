@@ -14,6 +14,8 @@ export const DirectChatWidget: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
 
   const directParam = useMemo(() => searchParams.get('direct'), [searchParams]);
+  // صفحه محصول موبایل یه نوار خرید چسبان پایین صفحه داره؛ دکمه دایرکت رو بالاتر می‌بریم که روش نیفته
+  const isProductDetailPage = /\/product\//.test(location.pathname);
 
   useEffect(() => {
     if (!isAuthenticated) return;
@@ -40,7 +42,7 @@ export const DirectChatWidget: React.FC = () => {
       <button
         type="button"
         onClick={open}
-        className={`fixed bottom-8 left-8 z-50 bg-zafting-text text-[#E8E0D9] p-4 rounded-full shadow-xl hover:scale-105 transition-transform duration-300 ${isOpen ? 'hidden' : 'flex'} items-center gap-2`}
+        className={`fixed ${isProductDetailPage ? 'bottom-24 lg:bottom-8' : 'bottom-8'} start-8 z-50 bg-zafting-text text-[#E8E0D9] p-4 rounded-full shadow-xl hover:scale-105 transition-transform duration-300 ${isOpen ? 'hidden' : 'flex'} items-center gap-2`}
         aria-label="direct-chat"
       >
         <MessagesSquare size={20} />

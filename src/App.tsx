@@ -67,7 +67,7 @@ const AppContent = () => {
                 <Route path="cart" element={<DashboardCart />} />
               </Route>
             </Route>
-            {/* Main site: Navbar + Cart + StylistChat */}
+            {/* Main site: Navbar + Cart */}
             <Route path="/:lang" element={<MainLayout />}>
               <Route index element={<Home />} />
               <Route path="shop" element={<Shop />} />

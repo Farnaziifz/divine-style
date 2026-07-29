@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Hero } from '../components/features/Hero';
+import { CategoryShowcase } from '../components/features/CategoryShowcase';
 import { ProductGrid } from '../components/features/ProductGrid';
 import { ReviewsSection } from '../components/features/ReviewsSection';
 import { useCart } from '../contexts/CartContext';
@@ -77,6 +78,7 @@ export const Home: React.FC = () => {
       {heroProducts.length > 0 && (
         <Hero products={heroProducts} onProductClick={handleProductClick} />
       )}
+      <CategoryShowcase />
       {gridProducts.length > 0 && (
         <ProductGrid
           products={gridProducts}

@@ -245,9 +245,17 @@ export const Shop: React.FC = () => {
                 return (
                   <div
                     key={c.id}
-                    className="absolute inset-0 transition-all duration-500 ease-out cursor-pointer"
+                    role="button"
+                    tabIndex={0}
+                    className="absolute inset-0 transition-all duration-500 ease-out cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-white rounded-4xl"
                     style={style}
                     onClick={() => navigate(`/${language}/collection/${c.id}`)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        navigate(`/${language}/collection/${c.id}`);
+                      }
+                    }}
                   >
                     <div
                       className={`w-full h-full rounded-4xl overflow-hidden relative ${c.bgColor}`}
@@ -299,10 +307,18 @@ export const Shop: React.FC = () => {
               {categories.map((cat, idx) => {
                 const img = getImageUrl(cat.image) || fallbackCategoryImages[idx % fallbackCategoryImages.length];
                 return (
-                  <div 
-                    key={cat.id} 
-                    className={`group relative h-[300px] md:h-[400px] rounded-4xl overflow-hidden cursor-pointer ${idx % 2 === 0 ? 'mt-0' : 'md:mt-8'}`}
+                  <div
+                    key={cat.id}
+                    role="button"
+                    tabIndex={0}
+                    className={`group relative h-[300px] md:h-[400px] rounded-4xl overflow-hidden cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-white ${idx % 2 === 0 ? 'mt-0' : 'md:mt-8'}`}
                     onClick={() => navigate(`/${language}/category/${cat.id}`)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        navigate(`/${language}/category/${cat.id}`);
+                      }
+                    }}
                   >
                     <img 
                       src={img} 

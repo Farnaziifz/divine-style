@@ -151,8 +151,16 @@ export const Collection: React.FC = () => {
             {products.map((p, idx) => (
               <article
                 key={p.id}
-                className={`group relative rounded-4xl overflow-hidden border border-white/60 bg-white/40 backdrop-blur-sm cursor-pointer ${idx % 2 === 0 ? '' : 'sm:translate-y-2'}`}
+                role="button"
+                tabIndex={0}
+                className={`group relative rounded-4xl overflow-hidden border border-white/60 bg-white/40 backdrop-blur-sm cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-zafting-text ${idx % 2 === 0 ? '' : 'sm:translate-y-2'}`}
                 onClick={() => navigate(`/${language}/product/${p.id}`)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    navigate(`/${language}/product/${p.id}`);
+                  }
+                }}
               >
                 <div className="relative aspect-[3/4] overflow-hidden">
                   <img
