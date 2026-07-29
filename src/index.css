@@ -35,6 +35,11 @@ html {
   font-size: 15px;
 }
 
+.dir-ltr {
+  direction: ltr;
+  unicode-bidi: isolate;
+}
+
 body {
   background-color: var(--color-zafting-bg);
   color: var(--color-zafting-text);
