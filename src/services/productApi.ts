@@ -92,7 +92,7 @@ export function mapApiProductToProduct(api: ApiProduct): Product {
           : Number(v.discountPrice)
         : undefined;
     return {
-      size: v.size != null ? String(v.size) : undefined,
+      size: v.size != null ? String(v.size) : 'One Size',
       color: v.color != null ? String(v.color) : undefined,
       colorCode: v.colorCode != null ? String(v.colorCode) : undefined,
       price: p,
