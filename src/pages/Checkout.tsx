@@ -29,9 +29,21 @@ type CheckoutResponse = {
 export const Checkout: React.FC = () => {
   const { language, t } = useLanguage();
   const navigate = useNavigate();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user, updateUser } = useAuth();
   const { cart, cartTotal, updateCartItemQuantity, removeFromCart, clearCart, refreshCart } = useCart();
   const [stockWarnings, setStockWarnings] = useState<string[]>([]);
+
+  const [profileName, setProfileName] = useState('');
+  const [profileLastName, setProfileLastName] = useState('');
+  const [savingProfile, setSavingProfile] = useState(false);
+  const [profileError, setProfileError] = useState<string | null>(null);
+
+  useEffect(() => {
+    setProfileName(user?.name ?? '');
+    setProfileLastName(user?.lastName ?? '');
+  }, [user?.name, user?.lastName]);
+
+  const needsProfile = !user?.name?.trim() || !user?.lastName?.trim();
 
   const [addresses, setAddresses] = useState<UserAddress[]>([]);
   const [selectedAddressId, setSelectedAddressId] = useState<string>('');
@@ -170,9 +182,18 @@ export const Checkout: React.FC = () => {
       hasCart &&
       Boolean(selectedAddressId) &&
       Boolean(selectedShippingMethodId) &&
+      (!needsProfile || Boolean(profileName.trim() && profileLastName.trim())) &&
       !checkingOut
     );
-  }, [hasCart, selectedAddressId, selectedShippingMethodId, checkingOut]);
+  }, [
+    hasCart,
+    selectedAddressId,
+    selectedShippingMethodId,
+    needsProfile,
+    profileName,
+    profileLastName,
+    checkingOut,
+  ]);
 
   const refreshPreview = useCallback(async (addressId: string, shippingMethodId: string, code: string) => {
     if (!isAuthenticated) return;
@@ -235,6 +256,26 @@ export const Checkout: React.FC = () => {
     setCheckingOut(true);
     setError(null);
     try {
+      if (needsProfile) {
+        setSavingProfile(true);
+        setProfileError(null);
+        try {
+          const updated = await userService.updateProfile({
+            name: profileName.trim(),
+            lastName: profileLastName.trim(),
+          });
+          updateUser(updated);
+        } catch (e: any) {
+          setProfileError(
+            e?.response?.data?.message ??
+              (language === 'fa' ? 'خطا در ذخیره نام و نام خانوادگی' : 'Failed to save your name'),
+          );
+          return;
+        } finally {
+          setSavingProfile(false);
+        }
+      }
+
       const payload = {
         addressId: selectedAddressId,
         shippingMethodId: selectedShippingMethodId,
@@ -288,6 +329,36 @@ export const Checkout: React.FC = () => {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mt-10">
         <div className="lg:col-span-2 space-y-8">
+          {needsProfile ? (
+            <section className="bg-white/40 border border-white rounded-2xl p-6">
+              <h2 className="font-serif text-xl text-zafting-text mb-4">
+                {language === 'fa' ? 'نام و نام خانوادگی' : 'Your name'}
+              </h2>
+              <p className="font-sans text-sm text-zafting-text/60 mb-4">
+                {language === 'fa'
+                  ? 'برای ثبت سفارش، لطفا نام و نام خانوادگی خود را وارد کنید.'
+                  : 'Please enter your name to place an order.'}
+              </p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <input
+                  value={profileName}
+                  onChange={(e) => setProfileName(e.target.value)}
+                  placeholder={language === 'fa' ? 'نام' : 'First name'}
+                  className="font-sans px-4 py-3 rounded-xl border border-zafting-text/20 bg-white/50 focus:outline-none focus:ring-2 focus:ring-zafting-text/30 focus:border-zafting-text"
+                />
+                <input
+                  value={profileLastName}
+                  onChange={(e) => setProfileLastName(e.target.value)}
+                  placeholder={language === 'fa' ? 'نام خانوادگی' : 'Last name'}
+                  className="font-sans px-4 py-3 rounded-xl border border-zafting-text/20 bg-white/50 focus:outline-none focus:ring-2 focus:ring-zafting-text/30 focus:border-zafting-text"
+                />
+              </div>
+              {profileError ? (
+                <p className="font-sans text-sm text-red-600 mt-3">{profileError}</p>
+              ) : null}
+            </section>
+          ) : null}
+
           <section className="bg-white/40 border border-white rounded-2xl p-6">
             <h2 className="font-serif text-xl text-zafting-text mb-4">
               {t('checkout.cart')}
@@ -538,10 +609,12 @@ export const Checkout: React.FC = () => {
           <button
             type="button"
             onClick={handlePay}
-            disabled={!canPay || loadingPreview}
+            disabled={!canPay || loadingPreview || savingProfile}
             className="font-sans w-full bg-zafting-text text-zafting-bg py-4 rounded-full font-bold uppercase tracking-widest hover:bg-zafting-accent transition-colors mt-6 disabled:opacity-60"
           >
-            {checkingOut ? (language === 'fa' ? 'در حال ثبت...' : 'Processing...') : t('checkout.pay')}
+            {checkingOut || savingProfile
+              ? (language === 'fa' ? 'در حال ثبت...' : 'Processing...')
+              : t('checkout.pay')}
           </button>
           {!canPay && !checkingOut && (
             <p className="font-sans text-xs text-zafting-text/60 mt-2 text-center">
@@ -549,6 +622,8 @@ export const Checkout: React.FC = () => {
                 ? t('checkout.selectAddress')
                 : !selectedShippingMethodId
                 ? t('checkout.selectShipping')
+                : needsProfile
+                ? (language === 'fa' ? 'نام و نام خانوادگی را وارد کنید' : 'Please enter your name')
                 : null}
             </p>
           )}
