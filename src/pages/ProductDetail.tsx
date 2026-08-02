@@ -29,6 +29,7 @@ export const ProductDetail: React.FC = () => {
   const [galleryRotateY, setGalleryRotateY] = useState(0);
   const [inShoppingList, setInShoppingList] = useState(false);
   const [loadingShoppingList, setLoadingShoppingList] = useState(false);
+  const [addToCartError, setAddToCartError] = useState<string | null>(null);
 
   useEffect(() => {
     if (product?.id && isAuthenticated) {
@@ -197,6 +198,20 @@ export const ProductDetail: React.FC = () => {
         (colorKey ? String(v.color ?? '') === colorKey : true)
     ) ??
     product.variants?.find((v) => String(v.size ?? '') === sizeKey);
+
+  const isOutOfStock = !currentVariant || currentVariant.stock <= 0;
+
+  const handleAddToCart = async () => {
+    setAddToCartError(null);
+    const result = await addToCart({
+      ...product,
+      selectedSize,
+      selectedColor: selectedColor || undefined,
+    });
+    if (!result.ok) {
+      setAddToCartError(result.message ?? 'ناموجود');
+    }
+  };
 
   // Use existing gallery or fallback to main image repeated
   const galleryImages = product.gallery && product.gallery.length > 0 
@@ -400,14 +415,15 @@ export const ProductDetail: React.FC = () => {
               </p>
 
               {/* Primary actions: Buy + Add to list — right after description for better UX */}
-              <div className="flex gap-3 mb-10">
+              <div className="flex gap-3 mb-2">
                 <button
                   type="button"
-                  onClick={() => addToCart({ ...product, selectedSize, selectedColor: selectedColor || undefined })}
-                  className="flex-1 bg-zafting-text text-zafting-bg py-4 px-6 rounded-full uppercase tracking-widest text-sm font-medium hover:opacity-95 transition-opacity flex items-center justify-center gap-2 shadow-lg"
+                  onClick={handleAddToCart}
+                  disabled={isOutOfStock}
+                  className="flex-1 bg-zafting-text text-zafting-bg py-4 px-6 rounded-full uppercase tracking-widest text-sm font-medium hover:opacity-95 transition-opacity flex items-center justify-center gap-2 shadow-lg disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:opacity-40"
                 >
                   <ShoppingBag size={20} />
-                  {t('shop.btn.buy')}
+                  {isOutOfStock ? (t('product.out_of_stock') || 'ناموجود') : t('shop.btn.buy')}
                 </button>
                 <button
                   type="button"
@@ -432,6 +448,10 @@ export const ProductDetail: React.FC = () => {
                   </span>
                 </button>
               </div>
+
+              {addToCartError && (
+                <p className="text-sm text-red-600 mb-8">{addToCartError}</p>
+              )}
 
               <hr className="border-zafting-text/10 mb-10" />
 
@@ -622,11 +642,12 @@ export const ProductDetail: React.FC = () => {
         </div>
         <button
           type="button"
-          onClick={() => addToCart({ ...product, selectedSize, selectedColor: selectedColor || undefined })}
-          className="flex-1 bg-zafting-text text-zafting-bg py-3 px-6 rounded-full uppercase tracking-widest text-sm font-medium hover:opacity-95 transition-opacity flex items-center justify-center gap-2 shadow-lg"
+          onClick={handleAddToCart}
+          disabled={isOutOfStock}
+          className="flex-1 bg-zafting-text text-zafting-bg py-3 px-6 rounded-full uppercase tracking-widest text-sm font-medium hover:opacity-95 transition-opacity flex items-center justify-center gap-2 shadow-lg disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:opacity-40"
         >
           <ShoppingBag size={18} />
-          {t('shop.btn.buy')}
+          {isOutOfStock ? (t('product.out_of_stock') || 'ناموجود') : t('shop.btn.buy')}
         </button>
       </div>
     </div>

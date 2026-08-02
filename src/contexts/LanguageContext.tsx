@@ -89,6 +89,7 @@ const translations: Record<Language, Record<string, string>> = {
     'shop.bottom.title': 'the embodiment of modern style,',
     'shop.bottom.subtitle': 'combining comfort and elegance.',
     'shop.btn.buy': 'Buy Now',
+    'product.out_of_stock': 'Out of stock',
     // Collection Stack
     'collection.light.tag': '#light dresses and shirts',
     'collection.light.desc': 'delicate fabrics and sophisticated silhouettes created for those who value style and comfort.',
@@ -297,6 +298,7 @@ const translations: Record<Language, Record<string, string>> = {
     'shop.bottom.title': 'تجسم سبک مدرن،',
     'shop.bottom.subtitle': 'ترکیبی از راحتی و ظرافت.',
     'shop.btn.buy': 'خرید کنید',
+    'product.out_of_stock': 'ناموجود',
     // Collection Stack
     'collection.light.tag': '#پیراهن‌های نخی و سبک',
     'collection.light.desc': 'پارچه‌های ظریف و سیلوئت‌های پیچیده، طراحی شده برای کسانی که به سبک و راحتی اهمیت می‌دهند.',

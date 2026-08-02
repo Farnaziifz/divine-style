@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { X, ArrowRight, ArrowLeft, Plus, Minus, ShoppingBag } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useCart } from '../../contexts/CartContext';
@@ -9,6 +9,18 @@ export const CartSidebar: React.FC = () => {
   const { cart, isCartOpen, setIsCartOpen, removeFromCart, updateCartItemQuantity, cartTotal } = useCart();
   const { t, direction, language } = useLanguage();
   const navigate = useNavigate();
+  const [itemErrors, setItemErrors] = useState<Record<string, string>>({});
+
+  const handleQuantityChange = async (id: string, quantity: number) => {
+    const result = await updateCartItemQuantity(id, quantity);
+    setItemErrors((prev) => {
+      if (result.ok) {
+        const { [id]: _removed, ...rest } = prev;
+        return rest;
+      }
+      return { ...prev, [id]: result.message ?? 'موجودی کافی نیست' };
+    });
+  };
 
   if (!isCartOpen) return null;
 
@@ -59,7 +71,7 @@ export const CartSidebar: React.FC = () => {
                     <div className="flex items-center gap-2">
                       <button
                         type="button"
-                        onClick={() => updateCartItemQuantity(item.id, item.quantity - 1)}
+                        onClick={() => handleQuantityChange(item.id, item.quantity - 1)}
                         className="w-8 h-8 flex items-center justify-center rounded-full border border-zafting-text/20 hover:bg-zafting-text/5 transition-colors"
                         aria-label="decrease-qty"
                       >
@@ -70,7 +82,7 @@ export const CartSidebar: React.FC = () => {
                       </span>
                       <button
                         type="button"
-                        onClick={() => updateCartItemQuantity(item.id, item.quantity + 1)}
+                        onClick={() => handleQuantityChange(item.id, item.quantity + 1)}
                         className="w-8 h-8 flex items-center justify-center rounded-full border border-zafting-text/20 hover:bg-zafting-text/5 transition-colors"
                         aria-label="increase-qty"
                       >
@@ -78,6 +90,9 @@ export const CartSidebar: React.FC = () => {
                       </button>
                     </div>
                   </div>
+                  {itemErrors[item.id] && (
+                    <p className="text-xs text-red-600 mt-1">{itemErrors[item.id]}</p>
+                  )}
                 </div>
                 <button
                   onClick={() => removeFromCart(item.id)}

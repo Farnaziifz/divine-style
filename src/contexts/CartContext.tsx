@@ -4,12 +4,26 @@ import api from '../services/api';
 import { mapApiProductToProduct } from '../services/productApi';
 import { useAuth } from './AuthContext';
 
+export interface CartMutationResult {
+  ok: boolean;
+  message?: string;
+}
+
+export interface CartRefreshResult {
+  previous: CartItem[];
+  current: CartItem[];
+}
+
 interface CartContextType {
   cart: CartItem[];
-  addToCart: (product: Product) => void;
+  addToCart: (product: Product) => Promise<CartMutationResult>;
   removeFromCart: (id: string) => void;
-  updateCartItemQuantity: (id: string, quantity: number) => void;
+  updateCartItemQuantity: (id: string, quantity: number) => Promise<CartMutationResult>;
   clearCart: () => void;
+  /** Re-fetches the basket from the server (picks up reservations the
+   * background sweeper expired) and reports what the cart looked like
+   * before/after so callers can surface what changed. */
+  refreshCart: () => Promise<CartRefreshResult>;
   cartTotal: number;
   isCartOpen: boolean;
   setIsCartOpen: (isOpen: boolean) => void;
@@ -93,11 +107,13 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     };
   }, [isAuthenticated]);
 
-  const addToCart = (product: Product) => {
-    setCart(prev => {
+  const addToCart = (product: Product): Promise<CartMutationResult> => {
+    let previousCart: CartItem[] = [];
+    setCart((prev) => {
+      previousCart = prev;
       const existing = prev.find(item => item.id === product.id);
       if (existing) {
-        return prev.map(item => 
+        return prev.map(item =>
           item.id === product.id ? { ...item, quantity: item.quantity + 1 } : item
         );
       }
@@ -105,14 +121,23 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     });
     setIsCartOpen(true);
 
-    if (isAuthenticated) {
-      api
-        .post('/basket/items', { productId: product.id, quantity: 1 })
-        .then((res) => setCart(hydrateFromBasketResponse(res.data)))
-        .catch(() => {
-          // ignore
-        });
+    if (!isAuthenticated) {
+      return Promise.resolve({ ok: true });
     }
+
+    return api
+      .post('/basket/items', { productId: product.id, quantity: 1 })
+      .then((res) => {
+        setCart(hydrateFromBasketResponse(res.data));
+        return { ok: true };
+      })
+      .catch((e) => {
+        setCart(previousCart);
+        return {
+          ok: false,
+          message: e?.response?.data?.message ?? 'موجودی کافی نیست',
+        };
+      });
   };
 
   const removeFromCart = (id: string) => {
@@ -134,30 +159,55 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setCart((prev) => prev.filter((item) => item.id !== id));
   };
 
-  const updateCartItemQuantity = (id: string, quantity: number) => {
+  const updateCartItemQuantity = (id: string, quantity: number): Promise<CartMutationResult> => {
     if (!Number.isFinite(quantity) || quantity < 1) {
       removeFromCart(id);
-      return;
+      return Promise.resolve({ ok: true });
     }
 
     if (isAuthenticated) {
+      let previousCart: CartItem[] = [];
+      let basketItemId: string | undefined;
       setCart((prev) => {
-        const item = prev.find((x) => x.id === id);
-        if (!item?.basketItemId) {
-          return prev.map((x) => (x.id === id ? { ...x, quantity } : x));
-        }
-        api
-          .patch(`/basket/items/${item.basketItemId}`, { quantity })
-          .then((res) => setCart(hydrateFromBasketResponse(res.data)))
-          .catch(() => {
-            // ignore
-          });
+        previousCart = prev;
+        basketItemId = prev.find((x) => x.id === id)?.basketItemId;
         return prev.map((x) => (x.id === id ? { ...x, quantity } : x));
       });
-      return;
+
+      if (!basketItemId) {
+        return Promise.resolve({ ok: true });
+      }
+
+      return api
+        .patch(`/basket/items/${basketItemId}`, { quantity })
+        .then((res) => {
+          setCart(hydrateFromBasketResponse(res.data));
+          return { ok: true };
+        })
+        .catch((e) => {
+          setCart(previousCart);
+          return {
+            ok: false,
+            message: e?.response?.data?.message ?? 'موجودی کافی نیست',
+          };
+        });
     }
 
     setCart((prev) => prev.map((item) => (item.id === id ? { ...item, quantity } : item)));
+    return Promise.resolve({ ok: true });
+  };
+
+  const refreshCart = async (): Promise<CartRefreshResult> => {
+    if (!isAuthenticated) return { previous: cart, current: cart };
+    const previous = cart;
+    try {
+      const res = await api.get('/basket');
+      const current = hydrateFromBasketResponse(res.data);
+      setCart(current);
+      return { previous, current };
+    } catch {
+      return { previous, current: previous };
+    }
   };
 
   const clearCart = () => {
@@ -175,7 +225,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const cartCount = cart.reduce((sum, item) => sum + item.quantity, 0);
 
   return (
-    <CartContext.Provider value={{ cart, addToCart, removeFromCart, updateCartItemQuantity, clearCart, cartTotal, isCartOpen, setIsCartOpen, cartCount }}>
+    <CartContext.Provider value={{ cart, addToCart, removeFromCart, updateCartItemQuantity, clearCart, refreshCart, cartTotal, isCartOpen, setIsCartOpen, cartCount }}>
       {children}
     </CartContext.Provider>
   );

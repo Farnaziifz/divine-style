@@ -30,7 +30,8 @@ export const Checkout: React.FC = () => {
   const { language, t } = useLanguage();
   const navigate = useNavigate();
   const { isAuthenticated } = useAuth();
-  const { cart, cartTotal, updateCartItemQuantity, removeFromCart, clearCart } = useCart();
+  const { cart, cartTotal, updateCartItemQuantity, removeFromCart, clearCart, refreshCart } = useCart();
+  const [stockWarnings, setStockWarnings] = useState<string[]>([]);
 
   const [addresses, setAddresses] = useState<UserAddress[]>([]);
   const [selectedAddressId, setSelectedAddressId] = useState<string>('');
@@ -41,6 +42,7 @@ export const Checkout: React.FC = () => {
   const [loadingPreview, setLoadingPreview] = useState(false);
   const [checkingOut, setCheckingOut] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [itemErrors, setItemErrors] = useState<Record<string, string>>({});
 
   const [paymentProviders, setPaymentProviders] = useState<
     Array<'ZARINPAL' | 'ZIBAL'>
@@ -124,6 +126,37 @@ export const Checkout: React.FC = () => {
     };
   }, [isAuthenticated]);
 
+  // Cart items are only reserved for a few minutes — poll the server so a
+  // reservation the background sweeper released while the user sat on this
+  // page gets reflected here instead of silently failing at pay time.
+  useEffect(() => {
+    if (!isAuthenticated) return;
+    const interval = window.setInterval(async () => {
+      const { previous, current } = await refreshCart();
+      const messages: string[] = [];
+      for (const prevItem of previous) {
+        const match = current.find((c) => c.id === prevItem.id);
+        if (!match) {
+          messages.push(
+            language === 'fa'
+              ? `«${prevItem.name}» از سبد شما حذف شد (موجودی به پایان رسید)`
+              : `"${prevItem.name}" was removed from your cart (out of stock)`,
+          );
+        } else if (match.quantity < prevItem.quantity) {
+          messages.push(
+            language === 'fa'
+              ? `تعداد «${prevItem.name}» در سبد شما کاهش یافت (موجودی محدود)`
+              : `The quantity of "${prevItem.name}" in your cart was reduced (limited stock)`,
+          );
+        }
+      }
+      if (messages.length > 0) {
+        setStockWarnings((prev) => [...prev, ...messages]);
+      }
+    }, 20_000);
+    return () => window.clearInterval(interval);
+  }, [isAuthenticated, language, refreshCart]);
+
   const hasCart = cart.length > 0;
   const cartSignature = useMemo(() => {
     return cart
@@ -181,6 +214,17 @@ export const Checkout: React.FC = () => {
     selectedShippingMethodId,
   ]);
 
+  const handleQuantityChange = async (id: string, quantity: number) => {
+    const result = await updateCartItemQuantity(id, quantity);
+    setItemErrors((prev) => {
+      if (result.ok) {
+        const { [id]: _removed, ...rest } = prev;
+        return rest;
+      }
+      return { ...prev, [id]: result.message ?? 'موجودی کافی نیست' };
+    });
+  };
+
   const applyDiscount = () => {
     if (!selectedAddressId) return;
     refreshPreview(selectedAddressId, selectedShippingMethodId, discountCode);
@@ -224,6 +268,24 @@ export const Checkout: React.FC = () => {
         {t('checkout.title')}
       </h1>
 
+      {stockWarnings.length > 0 && (
+        <div className="mt-6 rounded-2xl border border-red-200 bg-red-50 p-4 flex items-start justify-between gap-4">
+          <ul className="font-sans text-sm text-red-700 space-y-1 list-disc ps-4">
+            {stockWarnings.map((msg, idx) => (
+              <li key={idx}>{msg}</li>
+            ))}
+          </ul>
+          <button
+            type="button"
+            onClick={() => setStockWarnings([])}
+            aria-label={t('common.close')}
+            className="text-red-400 hover:text-red-700 shrink-0"
+          >
+            <X size={18} />
+          </button>
+        </div>
+      )}
+
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mt-10">
         <div className="lg:col-span-2 space-y-8">
           <section className="bg-white/40 border border-white rounded-2xl p-6">
@@ -253,7 +315,7 @@ export const Checkout: React.FC = () => {
                         <div className="flex items-center gap-2">
                           <button
                             type="button"
-                            onClick={() => updateCartItemQuantity(item.id, item.quantity - 1)}
+                            onClick={() => handleQuantityChange(item.id, item.quantity - 1)}
                             className="w-8 h-8 flex items-center justify-center rounded-full border border-zafting-text/20 hover:bg-zafting-text/5 transition-colors"
                             aria-label="decrease-qty"
                           >
@@ -264,7 +326,7 @@ export const Checkout: React.FC = () => {
                           </span>
                           <button
                             type="button"
-                            onClick={() => updateCartItemQuantity(item.id, item.quantity + 1)}
+                            onClick={() => handleQuantityChange(item.id, item.quantity + 1)}
                             className="w-8 h-8 flex items-center justify-center rounded-full border border-zafting-text/20 hover:bg-zafting-text/5 transition-colors"
                             aria-label="increase-qty"
                           >
@@ -272,6 +334,9 @@ export const Checkout: React.FC = () => {
                           </button>
                         </div>
                       </div>
+                      {itemErrors[item.id] && (
+                        <p className="text-xs text-red-600 mt-1">{itemErrors[item.id]}</p>
+                      )}
                     </div>
                     <button
                       type="button"
