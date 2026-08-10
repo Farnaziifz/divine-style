@@ -31,6 +31,10 @@ type ApiCategory = {
   parentId?: string | null;
 };
 
+type PaginatedCategories = {
+  data: ApiCategory[];
+};
+
 type PaginatedResponse<T> = {
   data: T[];
   meta: { total: number; page: number; limit: number; lastPage: number };
@@ -45,6 +49,7 @@ export const Category: React.FC = () => {
   const [totalPages, setTotalPages] = useState(1);
   const [isLoading, setIsLoading] = useState(true);
   const [categoryTitle, setCategoryTitle] = useState<string>('');
+  const [allCategories, setAllCategories] = useState<ApiCategory[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
   // Animation State
   const [animatingProduct, setAnimatingProduct] = useState<{ product: Product, rect: DOMRect } | null>(null);
@@ -129,6 +134,20 @@ export const Category: React.FC = () => {
 
     fetchCategoryAndProducts();
   }, [apiBaseUrl, categoryId, currentPage, sort, minPrice, maxPrice]);
+
+  useEffect(() => {
+    const fetchAllCategories = async () => {
+      try {
+        const res = await fetch(`${apiBaseUrl}/categories?page=1&limit=100`);
+        if (!res.ok) return;
+        const json = (await res.json()) as PaginatedCategories;
+        setAllCategories(json.data || []);
+      } catch (error) {
+        console.error('Failed to fetch categories', error);
+      }
+    };
+    fetchAllCategories();
+  }, [apiBaseUrl]);
 
   const saleProducts = products.filter((p) => typeof p.discountPrice === 'number' && p.discountPrice < p.price);
   const regularProducts = products.filter((p) => !p.discountPrice || p.discountPrice >= p.price);
@@ -299,6 +318,27 @@ export const Category: React.FC = () => {
         </div>
       </header>
 
+      {/* 1b. Category Switcher */}
+      {allCategories.length > 1 && (
+        <div className="mb-16 overflow-x-auto px-6 md:px-12 [&::-webkit-scrollbar]:hidden" style={{ scrollbarWidth: 'none' }}>
+          <div className="flex gap-3 min-w-max">
+            {allCategories.map((cat) => (
+              <button
+                key={cat.id}
+                onClick={() => { if (cat.id !== categoryId) { navigate(`/${language}/category/${cat.id}`); setCurrentPage(1); } }}
+                className={`px-5 py-2 rounded-full text-sm whitespace-nowrap border transition-colors cursor-pointer ${
+                  cat.id === categoryId
+                    ? 'bg-zafting-text text-zafting-bg border-zafting-text'
+                    : 'border-zafting-text/20 hover:bg-zafting-text/10'
+                }`}
+              >
+                {cat.title}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* 2. Spotlight (Mannequin Display) */}
       {featuredProduct && (
         <section className="px-6 md:px-12 mb-24">
@@ -348,25 +388,27 @@ export const Category: React.FC = () => {
       <section className="mb-24 relative">
          <div className="px-6 md:px-12 flex justify-between items-end mb-4">
              <h2 className="font-serif text-3xl">{t('cat.rack')}</h2>
-             <div className="flex items-center gap-4 text-sm font-sans">
-                <span className="opacity-50">{t('cat.aisle')} {currentPage} / {totalPages}</span>
-                <div className="flex gap-2">
-                    <button 
-                        disabled={currentPage === 1}
-                        onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-                        className="w-8 h-8 rounded-full border border-zafting-text/30 flex items-center justify-center disabled:opacity-30 hover:bg-zafting-text hover:text-white transition-colors rtl:scale-x-[-1]"
-                    >
-                        <ArrowLeft size={16} />
-                    </button>
-                    <button 
-                        disabled={currentPage === totalPages}
-                        onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
-                        className="w-8 h-8 rounded-full border border-zafting-text/30 flex items-center justify-center disabled:opacity-30 hover:bg-zafting-text hover:text-white transition-colors rtl:scale-x-[-1]"
-                    >
-                        <ArrowRight size={16} />
-                    </button>
-                </div>
-             </div>
+             {totalPages > 1 && (
+               <div className="flex items-center gap-4 text-sm font-sans">
+                  <span className="opacity-50">{t('cat.page')} {currentPage} {t('cat.page.of')} {totalPages}</span>
+                  <div className="flex gap-2">
+                      <button
+                          disabled={currentPage === 1}
+                          onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                          className="w-8 h-8 rounded-full border border-zafting-text/30 flex items-center justify-center disabled:opacity-30 hover:bg-zafting-text hover:text-white transition-colors rtl:scale-x-[-1]"
+                      >
+                          <ArrowLeft size={16} />
+                      </button>
+                      <button
+                          disabled={currentPage === totalPages}
+                          onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                          className="w-8 h-8 rounded-full border border-zafting-text/30 flex items-center justify-center disabled:opacity-30 hover:bg-zafting-text hover:text-white transition-colors rtl:scale-x-[-1]"
+                      >
+                          <ArrowRight size={16} />
+                      </button>
+                  </div>
+               </div>
+             )}
          </div>
 
          {/* Rail Visual */}
@@ -406,20 +448,25 @@ export const Category: React.FC = () => {
                         {/* Product Card (Hanging) */}
                         <div className="relative w-full aspect-[2/3] bg-white shadow-xl rounded-lg overflow-hidden transform origin-top transition-all duration-500 ease-out group-hover:rotate-1 group-hover:scale-[1.02]">
                              <img src={product.image} alt={product.name} className="w-full h-full object-cover" />
-                             
-                             {/* Hover Overlay */}
-                             <div className="absolute inset-0 bg-black/40 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-center items-center text-white p-4 text-center backdrop-blur-[2px]">
-                                 <h4 className="font-serif text-2xl mb-2 translate-y-0 md:translate-y-4 md:group-hover:translate-y-0 transition-transform duration-300">{product.name}</h4>
-                                 <p className="text-lg font-medium mb-4">{formatPriceToman(product.price)}</p>
-                                 <button
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        addToCart(product);
-                                    }}
-                                    className="bg-white text-black p-3 rounded-full hover:scale-110 transition-transform"
-                                 >
-                                     <ShoppingBag size={20} />
-                                 </button>
+
+                             {/* Quick add-to-cart */}
+                             <button
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    addToCart(product);
+                                }}
+                                aria-label={t('shop.btn.buy')}
+                                className="absolute top-3 end-3 z-20 bg-white/90 backdrop-blur-sm text-zafting-text p-2.5 rounded-full shadow-md hover:scale-110 hover:bg-white transition-all duration-200"
+                             >
+                                 <ShoppingBag size={16} />
+                             </button>
+
+                             {/* Hangtag: name + price, always visible */}
+                             <div className="absolute bottom-3 start-3 end-3 z-20">
+                                 <div className="inline-flex flex-col bg-[#E8E0D9]/95 backdrop-blur-sm border border-zafting-text/10 rounded-lg shadow-md px-3 py-1.5 rotate-[-1.5deg] group-hover:rotate-0 transition-transform duration-300 max-w-full">
+                                     <h4 className="font-serif text-sm text-zafting-text truncate">{product.name}</h4>
+                                     <p className="text-sm font-medium text-zafting-text">{formatPriceToman(product.price)}</p>
+                                 </div>
                              </div>
                         </div>
                     </div>

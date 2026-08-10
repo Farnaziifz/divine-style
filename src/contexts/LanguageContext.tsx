@@ -108,7 +108,8 @@ const translations: Record<Language, Record<string, string>> = {
     // Category Page (Rack)
     'cat.filter': 'Filter',
     'cat.sort': 'Sort',
-    'cat.aisle': 'Aisle',
+    'cat.page': 'Page',
+    'cat.page.of': 'of',
     'cat.sale': 'Clearance Bin',
     'cat.spotlight': 'Spotlight',
     'cat.rack': 'The Rack',
@@ -317,7 +318,8 @@ const translations: Record<Language, Record<string, string>> = {
     // Category Page (Rack)
     'cat.filter': 'فیلتر',
     'cat.sort': 'مرتب‌سازی',
-    'cat.aisle': 'راهرو',
+    'cat.page': 'صفحه',
+    'cat.page.of': 'از',
     'cat.sale': 'حراجی',
     'cat.spotlight': 'ویترین',
     'cat.rack': 'رگال',
