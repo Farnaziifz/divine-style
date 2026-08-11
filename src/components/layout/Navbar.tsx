@@ -4,6 +4,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { useCart } from '../../contexts/CartContext';
 import { useAuth } from '../../contexts/AuthContext';
+import logoIcon from '../../assets/images/logo-icon-512.png';
 
 export const Navbar: React.FC = () => {
   const { language, setLanguage, t, direction } = useLanguage();
@@ -70,8 +71,9 @@ export const Navbar: React.FC = () => {
             : 'mix-blend-multiply drop-shadow-[0_1px_2px_rgba(0,0,0,0.15)]'
         }`}
       >
-        <Link to={`/${language}`} className="pointer-events-auto text-xl tracking-widest font-sans font-medium text-zafting-text uppercase z-50">
-          {t('nav.title')}
+        <Link to={`/${language}`} className="pointer-events-auto flex items-center gap-2 text-xl tracking-widest font-sans font-medium text-zafting-text uppercase z-50">
+          <img src={logoIcon} alt="" className="h-8 w-8 md:h-9 md:w-9" />
+          <span>{t('nav.title')}</span>
         </Link>
         
         <div className="flex items-center gap-6 md:gap-8 pointer-events-auto">
@@ -118,8 +120,9 @@ export const Navbar: React.FC = () => {
       >
          {/* Close button and Header within Menu */}
          <div className="px-6 py-6 flex justify-between items-center">
-             <div className="text-xl tracking-widest font-sans font-medium text-zafting-text uppercase">
-                {t('nav.title')}
+             <div className="flex items-center gap-2 text-xl tracking-widest font-sans font-medium text-zafting-text uppercase">
+                <img src={logoIcon} alt="" className="h-8 w-8" />
+                <span>{t('nav.title')}</span>
              </div>
              <button onClick={() => setIsMenuOpen(false)} className="text-zafting-text hover:opacity-70 transition-opacity">
                 <X size={24} strokeWidth={1.5} />
