@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ShoppingBag, User, Menu, Globe, X, ArrowRight, ArrowLeft } from 'lucide-react';
+import { ShoppingBag, User, Menu, Globe, X, ArrowRight, ArrowLeft, Search } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { useCart } from '../../contexts/CartContext';
@@ -33,13 +33,15 @@ export const Navbar: React.FC = () => {
 
   const handleNavClick = (key: string) => {
     if (key === 'nav.menu.shop') {
-        navigate(`/${language}/shop`);
+        navigate(`/${language}/products`);
     } else if (key === 'nav.menu.collections') {
         navigate(`/${language}`);
     } else if (key === 'nav.menu.blog') {
         navigate(`/${language}/journal`);
     } else if (key === 'nav.menu.contact') {
         navigate(`/${language}/contact`);
+    } else if (key === 'nav.search') {
+        navigate(`/${language}/search`);
     }
     setIsMenuOpen(false);
   };
@@ -54,7 +56,8 @@ export const Navbar: React.FC = () => {
 
 
   const menuItems = [
-    { key: 'nav.menu.shop', href: `/${language}/shop` },
+    { key: 'nav.search', href: `/${language}/search` },
+    { key: 'nav.menu.shop', href: `/${language}/products` },
     { key: 'nav.menu.collections', href: `/${language}` },
     // These could be actual routes later
     { key: 'nav.menu.blog', href: `/${language}/journal` },
@@ -77,7 +80,14 @@ export const Navbar: React.FC = () => {
         </Link>
         
         <div className="flex items-center gap-6 md:gap-8 pointer-events-auto">
-          <button 
+          <button
+            onClick={() => navigate(`/${language}/search`)}
+            aria-label={t('nav.search')}
+            className="text-zafting-text hover:opacity-70 transition-opacity"
+          >
+            <Search size={20} strokeWidth={1.5} />
+          </button>
+          <button
             onClick={toggleLanguage}
             className="text-zafting-text hover:opacity-70 transition-opacity flex items-center gap-1 font-sans text-xs"
           >

@@ -11,7 +11,7 @@ export const Footer: React.FC = () => {
     {
       title: language === 'en' ? 'Shop' : 'فروشگاه',
       links: [
-        { label: language === 'en' ? 'All Products' : 'همه محصولات', href: `/${language}/shop` },
+        { label: language === 'en' ? 'All Products' : 'همه محصولات', href: `/${language}/products` },
         { label: language === 'en' ? 'Collections' : 'کالکشن‌ها', href: `/${language}` },
         { label: language === 'en' ? 'New Arrivals' : 'جدیدترین‌ها', href: `/${language}/shop` },
       ]

@@ -292,10 +292,16 @@ export const Shop: React.FC = () => {
 
       {/* 4. Category Grid Section (NEW) */}
       <section className="px-6 pb-32 max-w-[1600px] mx-auto">
-          <div className="flex justify-between items-end mb-12">
+          <div className="flex flex-wrap justify-between items-end gap-4 mb-12">
             <h2 className="font-serif text-4xl md:text-6xl text-zafting-text">
                 {t('shop.cat.title')}
             </h2>
+            <button
+              onClick={() => navigate(`/${language}/products`)}
+              className="flex items-center gap-2 px-6 py-3 border border-zafting-text/20 rounded-full hover:bg-zafting-text hover:text-zafting-bg transition-colors cursor-pointer text-sm uppercase tracking-widest"
+            >
+              {t('catalog.viewAll')} <ArrowIcon size={16} />
+            </button>
           </div>
 
           {isCategoriesLoading ? (

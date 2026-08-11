@@ -48,7 +48,7 @@ export const ProductGrid: React.FC<ProductGridProps> = ({ products, onAddToCart,
                 <div>
                     <h3 className="font-serif text-xl text-zafting-text">{product.name}</h3>
                     <p className="text-xs text-zafting-text/60 uppercase tracking-widest mt-1">
-                      {t(`product.category.${product.category}`) || product.category}
+                      {product.category}
                     </p>
                 </div>
                 <span className="font-medium text-zafting-text">{formatPriceToman(product.price)}</span>

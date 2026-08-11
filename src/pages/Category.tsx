@@ -252,7 +252,7 @@ export const Category: React.FC = () => {
                <Filter size={16} /> <span className="text-sm uppercase">{t('cat.filter')}</span>
             </button>
             {isFilterOpen && (
-              <div className="absolute top-full mt-2 end-0 z-30 w-64 bg-zafting-bg border border-zafting-text/15 rounded-2xl shadow-xl p-4">
+              <div className="absolute top-full mt-2 start-0 z-30 w-64 bg-zafting-bg border border-zafting-text/15 rounded-2xl shadow-xl p-4">
                 <p className="text-xs uppercase tracking-widest opacity-60 mb-3">{t('cat.filter.price')}</p>
                 <div className="flex items-center gap-2 mb-4">
                   <input
@@ -298,7 +298,7 @@ export const Category: React.FC = () => {
                <SlidersHorizontal size={16} /> <span className="text-sm uppercase">{t('cat.sort')}</span>
             </button>
             {isSortOpen && (
-              <div className="absolute top-full mt-2 end-0 z-30 w-56 bg-zafting-bg border border-zafting-text/15 rounded-2xl shadow-xl p-2">
+              <div className="absolute top-full mt-2 start-0 z-30 w-56 bg-zafting-bg border border-zafting-text/15 rounded-2xl shadow-xl p-2">
                 {([
                   ['newest', 'cat.sort.new'],
                   ['price_asc', 'cat.sort.price_asc'],

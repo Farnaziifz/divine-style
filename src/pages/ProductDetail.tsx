@@ -367,7 +367,7 @@ export const ProductDetail: React.FC = () => {
               
               {/* Breadcrumb / Rating */}
               <div className="flex items-center gap-2 mb-4 text-zafting-text/60 text-sm uppercase tracking-widest">
-                  <span>{t(`product.category.${product.category}`) || product.category}</span>
+                  <span>{product.category}</span>
                   {product.reviews && product.reviews.length > 0 && (
                     <>
                       <span>•</span>

@@ -64,7 +64,7 @@ export const CartSidebar: React.FC = () => {
                 <div className="flex-1">
                   <h4 className="font-serif text-lg">{item.name}</h4>
                   <p className="font-sans text-sm opacity-60">
-                     {t(`product.category.${item.category}`)}
+                     {item.category}
                   </p>
                   <div className="flex justify-between items-center mt-2">
                     <span className="font-sans font-medium">{formatPriceToman(item.discountPrice || item.price)}</span>
