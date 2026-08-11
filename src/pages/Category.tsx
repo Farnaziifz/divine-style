@@ -239,7 +239,11 @@ export const Category: React.FC = () => {
             <BackArrowIcon size={14} /> {t('shop.cat.title')}
           </button>
           <h1 className="font-serif text-5xl md:text-7xl text-zafting-text">
-            {categoryTitle || categoryId}
+            {isLoading ? (
+              <span className="inline-block h-[1em] w-64 max-w-[60vw] rounded-lg bg-zafting-text/10 animate-pulse align-middle" />
+            ) : (
+              categoryTitle || t('shop.cat.title')
+            )}
           </h1>
         </div>
 
