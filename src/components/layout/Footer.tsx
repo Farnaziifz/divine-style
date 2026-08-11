@@ -27,7 +27,7 @@ export const Footer: React.FC = () => {
     {
       title: language === 'en' ? 'Customer Care' : 'خدمات مشتریان',
       links: [
-        { label: language === 'en' ? 'Shipping & Returns' : 'ارسال و مرجوعی', href: '#' },
+        { label: language === 'en' ? 'Shipping & Payment' : 'روش‌های ارسال و پرداخت', href: `/${language}/shipping-payment` },
         { label: language === 'en' ? 'FAQ' : 'سوالات متداول', href: '#' },
         { label: language === 'en' ? 'Terms of Service' : 'قوانین و مقررات', href: '#' },
       ]

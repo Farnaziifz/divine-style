@@ -20,6 +20,7 @@ import { PaymentResult } from './pages/PaymentResult';
 import { Journal } from './pages/Journal';
 import { JournalPost } from './pages/JournalPost';
 import { Contact } from './pages/Contact';
+import { ShippingAndPayment } from './pages/ShippingAndPayment';
 import { DashboardOrders } from './pages/dashboard/DashboardOrders';
 import { DashboardFavorites } from './pages/dashboard/DashboardFavorites';
 import { DashboardCart } from './pages/dashboard/DashboardCart';
@@ -74,6 +75,7 @@ const AppContent = () => {
               <Route path="journal" element={<Journal />} />
               <Route path="journal/:slug" element={<JournalPost />} />
               <Route path="contact" element={<Contact />} />
+              <Route path="shipping-payment" element={<ShippingAndPayment />} />
               <Route path="category/:id" element={<Category />} />
               <Route path="collection/:id" element={<Collection />} />
               <Route path="product/:id" element={<ProductDetail />} />
