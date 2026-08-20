@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Product } from '../types';
 import { fetchProductById } from '../services/productApi';
-import { ArrowLeft, ArrowRight, Star, ShoppingBag, Ruler, Shirt, Layers, Play, X, Rotate3D, Sparkles, Loader2, ListPlus, ListMinus } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Star, ShoppingBag, Shirt, Layers, Play, X, Rotate3D, Sparkles, Loader2, ListPlus, ListMinus } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useCart } from '../contexts/CartContext';
 import { useAuth } from '../contexts/AuthContext';
@@ -190,7 +190,6 @@ export const ProductDetail: React.FC = () => {
 
   const sizeKey = String(selectedSize ?? '');
   const colorKey = String(selectedColor ?? '');
-  const currentSizeData = product.sizes?.find((s) => String(s.label) === sizeKey);
   const currentVariant =
     product.variants?.find(
       (v) =>
@@ -479,15 +478,6 @@ export const ProductDetail: React.FC = () => {
                 <div className="mb-10">
                    <div className="flex justify-between items-center mb-4">
                         <h3 className="font-sans uppercase text-sm tracking-widest font-bold text-zafting-text/80">{t('product.select_size')}</h3>
-                        {product.sizes?.some((s) => s.dims || s.specifications) && (
-                          <button
-                            type="button"
-                            onClick={() => document.getElementById('size-guide-chart')?.scrollIntoView({ behavior: 'smooth', block: 'center' })}
-                            className="text-xs underline cursor-pointer hover:text-zafting-accent"
-                          >
-                            {t('product.size_guide')}
-                          </button>
-                        )}
                    </div>
                    
                    <div className="flex flex-wrap gap-3">
@@ -532,62 +522,6 @@ export const ProductDetail: React.FC = () => {
                     ))}
                   </div>
                 </div>
-              )}
-
-              {/* Dynamic Measurement Chart — مقادیر بر اساس سایز + رنگ انتخاب‌شده به‌روز می‌شوند */}
-              {(currentSizeData || currentVariant) && (
-                  <div id="size-guide-chart" className="mb-12 bg-white/30 rounded-2xl p-6 border border-white/50 transition-all duration-300" key={`${selectedSize}-${selectedColor}`}>
-                      <div className="flex items-center gap-2 mb-4 text-zafting-text/60">
-                           <Ruler size={16} />
-                           <span className="text-xs uppercase tracking-widest font-bold">
-                             {t('product.size_guide')} — {selectedSize}
-                             {selectedColor ? ` · ${selectedColor}` : ''}
-                           </span>
-                      </div>
-                      {(() => {
-                        const specs = currentVariant?.specifications ?? currentSizeData?.specifications;
-                        if (specs && Object.keys(specs).length > 0) {
-                          return (
-                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                              {Object.entries(specs).map(([specKey, specVal]) => (
-                                <div key={specKey} className="flex flex-col">
-                                  <span className="text-xs opacity-50 uppercase">{specKey.replace(/_/g, ' ')}</span>
-                                  <span className="font-serif text-xl">{String(specVal)}</span>
-                                </div>
-                              ))}
-                            </div>
-                          );
-                        }
-                        const d = currentSizeData?.dims;
-                        if (!d) return null;
-                        return (
-                          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                            <div className="flex flex-col">
-                              <span className="text-xs opacity-50 uppercase">{t('measure.bust')}</span>
-                              <span className="font-serif text-xl">{d.bust}</span>
-                            </div>
-                            <div className="flex flex-col">
-                              <span className="text-xs opacity-50 uppercase">{t('measure.waist')}</span>
-                              <span className="font-serif text-xl">{d.waist}</span>
-                            </div>
-                            <div className="flex flex-col">
-                              <span className="text-xs opacity-50 uppercase">{t('measure.hips')}</span>
-                              <span className="font-serif text-xl">{d.hips}</span>
-                            </div>
-                            <div className="flex flex-col">
-                              <span className="text-xs opacity-50 uppercase">{t('measure.length')}</span>
-                              <span className="font-serif text-xl">{d.length}</span>
-                            </div>
-                            {d.sleeve != null && (
-                              <div className="flex flex-col">
-                                <span className="text-xs opacity-50 uppercase">{t('measure.sleeve')}</span>
-                                <span className="font-serif text-xl">{d.sleeve}</span>
-                              </div>
-                            )}
-                          </div>
-                        );
-                      })()}
-                  </div>
               )}
 
               {/* Strong CTA for Styling Inspiration (NEW) */}
