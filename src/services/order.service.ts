@@ -6,6 +6,8 @@ export type OrderItemDto = {
   productVariantId: string;
   sku: string;
   title: string;
+  color?: string | null;
+  size?: string | null;
   quantity: number;
   unitPrice: number;
   unitDiscountPrice: number | null;

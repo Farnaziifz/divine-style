@@ -202,10 +202,15 @@ export const ProductDetail: React.FC = () => {
 
   const handleAddToCart = async () => {
     setAddToCartError(null);
+    if (colorsForProduct.length > 0 && !selectedColor) {
+      setAddToCartError(t('product.select_color_required') || 'لطفاً رنگ مورد نظر را انتخاب کنید');
+      return;
+    }
     const result = await addToCart({
       ...product,
       selectedSize,
       selectedColor: selectedColor || undefined,
+      productVariantId: currentVariant?.id,
     });
     if (!result.ok) {
       setAddToCartError(result.message ?? 'ناموجود');
@@ -502,15 +507,22 @@ export const ProductDetail: React.FC = () => {
               {/* Color Selector — هر رنگ مشخصات خودش را دارد */}
               {colorsForProduct.length > 0 && (
                 <div className="mb-10">
-                  <h3 className="font-sans uppercase text-sm tracking-widest font-bold text-zafting-text/80 mb-4">
-                    {t('product.select_color') || 'رنگ'}
-                  </h3>
+                  <div className="flex items-center gap-2 mb-1">
+                    <h3 className="font-sans uppercase text-sm tracking-widest font-bold text-zafting-text/80">
+                      {t('product.select_color') || 'رنگ'}
+                    </h3>
+                    <span className="text-red-600 text-sm leading-none" aria-hidden="true">*</span>
+                  </div>
+                  <p className="font-sans text-xs text-zafting-text/50 mb-4">
+                    {t('product.select_color_hint') || 'رنگ محصول ارسالی همین رنگ انتخابی شما خواهد بود'}
+                  </p>
                   <div className="flex flex-wrap gap-3">
                     {colorsForSize.map((color) => (
                       <button
                         key={color}
                         type="button"
                         onClick={() => setSelectedColor(color)}
+                        aria-pressed={selectedColor === color}
                         className={`px-4 py-2 rounded-full border text-sm font-medium transition-all ${
                           selectedColor === color
                             ? 'bg-zafting-text text-[#E8E0D9] border-zafting-text'

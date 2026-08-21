@@ -12,6 +12,7 @@ import { formatPriceToman } from '../utils/format';
 type CheckoutPreview = {
   subtotal: number;
   discountCode: string | null;
+  discountMessage: string | null;
   discountAmount: number;
   shippingCost: number;
   payableAmount: number;
@@ -147,7 +148,7 @@ export const Checkout: React.FC = () => {
       const { previous, current } = await refreshCart();
       const messages: string[] = [];
       for (const prevItem of previous) {
-        const match = current.find((c) => c.id === prevItem.id);
+        const match = current.find((c) => c.cartLineId === prevItem.cartLineId);
         if (!match) {
           messages.push(
             language === 'fa'
@@ -172,7 +173,7 @@ export const Checkout: React.FC = () => {
   const hasCart = cart.length > 0;
   const cartSignature = useMemo(() => {
     return cart
-      .map((it) => `${it.basketItemId || it.id}:${it.quantity}`)
+      .map((it) => `${it.cartLineId}:${it.quantity}`)
       .sort()
       .join('|');
   }, [cart]);
@@ -368,7 +369,7 @@ export const Checkout: React.FC = () => {
             ) : (
               <div className="space-y-5">
                 {cart.map((item) => (
-                  <div key={item.id} className="flex gap-4">
+                  <div key={item.cartLineId} className="flex gap-4">
                     <img
                       src={item.image}
                       alt={item.name}
@@ -379,6 +380,20 @@ export const Checkout: React.FC = () => {
                       <p className="font-sans text-sm opacity-60">
                         {item.category}
                       </p>
+                      {(item.selectedColor || item.selectedSize) && (
+                        <p className="font-sans text-xs opacity-70 mt-1 flex items-center gap-2">
+                          {item.selectedColor && (
+                            <span className="inline-flex items-center gap-1">
+                              <span
+                                className="w-3 h-3 rounded-full border border-zafting-text/20 inline-block"
+                                style={{ backgroundColor: item.variants?.[0]?.colorCode || undefined }}
+                              />
+                              {item.selectedColor}
+                            </span>
+                          )}
+                          {item.selectedSize && <span>{item.selectedSize}</span>}
+                        </p>
+                      )}
                       <div className="flex justify-between items-center mt-2">
                         <span className="font-sans font-medium">
                           {formatPriceToman(item.discountPrice || item.price)}
@@ -386,7 +401,7 @@ export const Checkout: React.FC = () => {
                         <div className="flex items-center gap-2">
                           <button
                             type="button"
-                            onClick={() => handleQuantityChange(item.id, item.quantity - 1)}
+                            onClick={() => handleQuantityChange(item.cartLineId, item.quantity - 1)}
                             className="w-8 h-8 flex items-center justify-center rounded-full border border-zafting-text/20 hover:bg-zafting-text/5 transition-colors"
                             aria-label="decrease-qty"
                           >
@@ -397,7 +412,7 @@ export const Checkout: React.FC = () => {
                           </span>
                           <button
                             type="button"
-                            onClick={() => handleQuantityChange(item.id, item.quantity + 1)}
+                            onClick={() => handleQuantityChange(item.cartLineId, item.quantity + 1)}
                             className="w-8 h-8 flex items-center justify-center rounded-full border border-zafting-text/20 hover:bg-zafting-text/5 transition-colors"
                             aria-label="increase-qty"
                           >
@@ -405,13 +420,13 @@ export const Checkout: React.FC = () => {
                           </button>
                         </div>
                       </div>
-                      {itemErrors[item.id] && (
-                        <p className="text-xs text-red-600 mt-1">{itemErrors[item.id]}</p>
+                      {itemErrors[item.cartLineId] && (
+                        <p className="text-xs text-red-600 mt-1">{itemErrors[item.cartLineId]}</p>
                       )}
                     </div>
                     <button
                       type="button"
-                      onClick={() => removeFromCart(item.id)}
+                      onClick={() => removeFromCart(item.cartLineId)}
                       className="self-start p-2.5 -m-2.5 text-red-500 hover:text-red-700 rounded-full"
                       aria-label={t('cart.remove')}
                     >
@@ -578,6 +593,12 @@ export const Checkout: React.FC = () => {
               <span>{formatPriceToman(preview?.payableAmount ?? cartTotal)}</span>
             </div>
           </div>
+
+          {preview?.discountMessage ? (
+            <div className="mt-4 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-700 text-sm font-sans px-4 py-3">
+              🎁 {preview.discountMessage}
+            </div>
+          ) : null}
 
           <div className="mt-6">
             <label htmlFor="discount-code" className="font-sans text-sm text-zafting-text/70 block mb-2">

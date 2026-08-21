@@ -319,6 +319,20 @@ export const DashboardOrderDetail: React.FC = () => {
                         <p className="font-mono text-xs text-zafting-text/50 dir-ltr truncate mt-1">
                           {it.sku}
                         </p>
+                        {(it.color || it.size) && (
+                          <p className="font-sans text-xs text-zafting-text/70 mt-1 flex items-center gap-2">
+                            {it.color && (
+                              <span className="px-2 py-0.5 rounded-full bg-zafting-text/10">
+                                {language === 'fa' ? 'رنگ' : 'Color'}: {it.color}
+                              </span>
+                            )}
+                            {it.size && (
+                              <span className="px-2 py-0.5 rounded-full bg-zafting-text/10">
+                                {language === 'fa' ? 'سایز' : 'Size'}: {it.size}
+                              </span>
+                            )}
+                          </p>
+                        )}
                         <p className="font-sans text-xs text-zafting-text/60 mt-2">
                           {language === 'fa' ? 'تعداد' : 'Qty'}: {it.quantity}
                         </p>

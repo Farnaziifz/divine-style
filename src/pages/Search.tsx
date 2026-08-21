@@ -6,6 +6,7 @@ import { useCart } from '../contexts/CartContext';
 import { Search as SearchIcon, ShoppingBag, ArrowRight, ArrowLeft } from 'lucide-react';
 import { formatPriceToman } from '../utils/format';
 import { getApiBaseUrl, resolveImageUrl } from '../utils/imageUrl';
+import { hasMultipleColors } from '../utils/variant';
 
 type ApiProductVariant = {
   sku: string;
@@ -190,6 +191,10 @@ export const Search: React.FC = () => {
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
+                      if (hasMultipleColors(product)) {
+                        navigate(`/${language}/product/${product.id}`);
+                        return;
+                      }
                       addToCart(product);
                     }}
                     aria-label={t('shop.btn.buy')}

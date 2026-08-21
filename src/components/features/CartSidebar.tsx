@@ -59,19 +59,33 @@ export const CartSidebar: React.FC = () => {
             </div>
           ) : (
             cart.map(item => (
-              <div key={item.id} className="flex gap-4">
+              <div key={item.cartLineId} className="flex gap-4">
                 <img src={item.image} alt={item.name} className="w-20 h-24 object-cover rounded-md" />
                 <div className="flex-1">
                   <h4 className="font-serif text-lg">{item.name}</h4>
                   <p className="font-sans text-sm opacity-60">
                      {item.category}
                   </p>
+                  {(item.selectedColor || item.selectedSize) && (
+                    <p className="font-sans text-xs opacity-70 mt-1 flex items-center gap-2">
+                      {item.selectedColor && (
+                        <span className="inline-flex items-center gap-1">
+                          <span
+                            className="w-3 h-3 rounded-full border border-zafting-text/20 inline-block"
+                            style={{ backgroundColor: item.variants?.[0]?.colorCode || undefined }}
+                          />
+                          {item.selectedColor}
+                        </span>
+                      )}
+                      {item.selectedSize && <span>{item.selectedSize}</span>}
+                    </p>
+                  )}
                   <div className="flex justify-between items-center mt-2">
                     <span className="font-sans font-medium">{formatPriceToman(item.discountPrice || item.price)}</span>
                     <div className="flex items-center gap-2">
                       <button
                         type="button"
-                        onClick={() => handleQuantityChange(item.id, item.quantity - 1)}
+                        onClick={() => handleQuantityChange(item.cartLineId, item.quantity - 1)}
                         className="w-8 h-8 flex items-center justify-center rounded-full border border-zafting-text/20 hover:bg-zafting-text/5 transition-colors"
                         aria-label="decrease-qty"
                       >
@@ -82,7 +96,7 @@ export const CartSidebar: React.FC = () => {
                       </span>
                       <button
                         type="button"
-                        onClick={() => handleQuantityChange(item.id, item.quantity + 1)}
+                        onClick={() => handleQuantityChange(item.cartLineId, item.quantity + 1)}
                         className="w-8 h-8 flex items-center justify-center rounded-full border border-zafting-text/20 hover:bg-zafting-text/5 transition-colors"
                         aria-label="increase-qty"
                       >
@@ -90,12 +104,12 @@ export const CartSidebar: React.FC = () => {
                       </button>
                     </div>
                   </div>
-                  {itemErrors[item.id] && (
-                    <p className="text-xs text-red-600 mt-1">{itemErrors[item.id]}</p>
+                  {itemErrors[item.cartLineId] && (
+                    <p className="text-xs text-red-600 mt-1">{itemErrors[item.cartLineId]}</p>
                   )}
                 </div>
                 <button
-                  onClick={() => removeFromCart(item.id)}
+                  onClick={() => removeFromCart(item.cartLineId)}
                   className="self-start p-2.5 -m-2.5 text-red-500 hover:text-red-700 rounded-full"
                   aria-label={t('cart.remove')}
                 >

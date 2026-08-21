@@ -6,6 +6,7 @@ import { useCart } from '../contexts/CartContext';
 import { Filter, SlidersHorizontal, ArrowRight, ArrowLeft, Percent, ShoppingBag } from 'lucide-react';
 import { formatPriceToman } from '../utils/format';
 import { getApiBaseUrl, resolveImageUrl } from '../utils/imageUrl';
+import { hasMultipleColors } from '../utils/variant';
 
 type ApiProductVariant = {
   sku: string;
@@ -377,8 +378,14 @@ export const Category: React.FC = () => {
                   ) : (
                     <p className="text-2xl mb-6">{formatPriceToman(featuredProduct.price)}</p>
                   )}
-                  <button 
-                    onClick={() => addToCart(featuredProduct)}
+                  <button
+                    onClick={() => {
+                      if (hasMultipleColors(featuredProduct)) {
+                        navigate(`/${language}/product/${featuredProduct.id}`);
+                        return;
+                      }
+                      addToCart(featuredProduct);
+                    }}
                     className="bg-zafting-text text-[#E8E0D9] px-8 py-4 rounded-full uppercase tracking-widest hover:scale-105 transition-transform"
                   >
                     {t('shop.btn.buy')}
@@ -457,6 +464,11 @@ export const Category: React.FC = () => {
                              <button
                                 onClick={(e) => {
                                     e.stopPropagation();
+                                    // چند رنگ دارد؟ نمی‌توان بدون انتخاب رنگ اضافه کرد — به صفحه محصول برو
+                                    if (hasMultipleColors(product)) {
+                                        navigate(`/${language}/product/${product.id}`);
+                                        return;
+                                    }
                                     addToCart(product);
                                 }}
                                 aria-label={t('shop.btn.buy')}

@@ -13,6 +13,7 @@ function getImageUrl(path: string | undefined | null): string {
 export type ApiSpecificationValue = string | number | boolean | null;
 
 export interface ApiProductVariant {
+  id?: string;
   sku: string;
   size?: string | null;
   color?: string | null;
@@ -92,6 +93,7 @@ export function mapApiProductToProduct(api: ApiProduct): Product {
           : Number(v.discountPrice)
         : undefined;
     return {
+      id: v.id,
       size: v.size != null ? String(v.size) : 'One Size',
       color: v.color != null ? String(v.color) : undefined,
       colorCode: v.colorCode != null ? String(v.colorCode) : undefined,

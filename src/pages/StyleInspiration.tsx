@@ -6,6 +6,7 @@ import { useLanguage } from '../contexts/LanguageContext';
 import { useCart } from '../contexts/CartContext';
 import { ArrowLeft, ArrowRight, ShoppingBag, Loader2 } from 'lucide-react';
 import { formatPriceToman } from '../utils/format';
+import { hasMultipleColors } from '../utils/variant';
 
 export const StyleInspiration: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -166,8 +167,14 @@ export const StyleInspiration: React.FC = () => {
           <div className="bg-[#2A2A2A] rounded-[3rem] p-12 md:p-20 text-[#E8E0D9] text-center max-w-5xl mx-auto relative overflow-hidden">
               <div className="relative z-10">
                   <h3 className="font-serif text-4xl md:text-6xl mb-8">Make it Yours</h3>
-                  <button 
-                    onClick={() => addToCart(product)}
+                  <button
+                    onClick={() => {
+                      if (hasMultipleColors(product)) {
+                        navigate(`/${language}/product/${product.id}`);
+                        return;
+                      }
+                      addToCart(product);
+                    }}
                     className="bg-[#E8E0D9] text-zafting-text px-10 py-4 rounded-full text-sm uppercase tracking-widest hover:scale-105 transition-transform font-bold"
                   >
                       {t('shop.btn.buy')} - {formatPriceToman(product.price)}

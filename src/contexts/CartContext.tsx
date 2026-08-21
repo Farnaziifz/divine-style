@@ -14,11 +14,18 @@ export interface CartRefreshResult {
   current: CartItem[];
 }
 
+/** ورودی افزودن به سبد: محصول + واریانت انتخاب‌شده (رنگ/سایز) توسط کاربر */
+export type AddToCartInput = Product & {
+  selectedSize?: string;
+  selectedColor?: string;
+  productVariantId?: string;
+};
+
 interface CartContextType {
   cart: CartItem[];
-  addToCart: (product: Product) => Promise<CartMutationResult>;
-  removeFromCart: (id: string) => void;
-  updateCartItemQuantity: (id: string, quantity: number) => Promise<CartMutationResult>;
+  addToCart: (product: AddToCartInput) => Promise<CartMutationResult>;
+  removeFromCart: (cartLineId: string) => void;
+  updateCartItemQuantity: (cartLineId: string, quantity: number) => Promise<CartMutationResult>;
   clearCart: () => void;
   /** Re-fetches the basket from the server (picks up reservations the
    * background sweeper expired) and reports what the cart looked like
@@ -31,6 +38,24 @@ interface CartContextType {
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
+
+/** هر ترکیب محصول+واریانت یک خط جدا در سبد است تا رنگ‌های مختلف با هم قاطی نشوند */
+function makeCartLineId(productId: string, productVariantId?: string): string {
+  return productVariantId ? `${productId}::${productVariantId}` : productId;
+}
+
+/** واریانت منطبق با رنگ/سایز انتخاب‌شده را از لیست واریانت‌های محصول پیدا می‌کند */
+function resolveVariantId(product: AddToCartInput): string | undefined {
+  if (product.productVariantId) return product.productVariantId;
+  const variants = product.variants ?? [];
+  if (variants.length === 0) return undefined;
+  const bySizeAndColor = variants.find(
+    (v) =>
+      (product.selectedSize == null || String(v.size ?? '') === String(product.selectedSize)) &&
+      (product.selectedColor == null || String(v.color ?? '') === String(product.selectedColor)),
+  );
+  return bySizeAndColor?.id ?? variants[0]?.id;
+}
 
 export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [cart, setCart] = useState<CartItem[]>([]);
@@ -46,10 +71,17 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
         const quantity = typeof it?.quantity === 'number' ? it.quantity : Number(it?.quantity ?? 0);
         if (!product || !product.id || !Number.isFinite(quantity) || quantity <= 0) return null;
         const mapped = mapApiProductToProduct(product);
+        // هر آیتم سبد سرور دقیقاً یک واریانت (رنگ/سایز) را نمایندگی می‌کند
+        const lineVariant = mapped.variants?.[0];
+        const productVariantId: string | undefined = it.productVariantId ?? lineVariant?.id;
         return {
           ...mapped,
           quantity,
           basketItemId: it.id,
+          productVariantId,
+          selectedColor: lineVariant?.color,
+          selectedSize: lineVariant?.size,
+          cartLineId: makeCartLineId(mapped.id, productVariantId),
         } as CartItem;
       })
       .filter(Boolean) as CartItem[];
@@ -60,7 +92,15 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const raw = localStorage.getItem(CART_STORAGE_KEY);
       if (!raw) return;
       const parsed = JSON.parse(raw) as CartItem[];
-      if (Array.isArray(parsed)) setCart(parsed);
+      if (Array.isArray(parsed)) {
+        // سازگاری با سبدهای قدیمی ذخیره‌شده که فیلد cartLineId نداشتند
+        setCart(
+          parsed.map((item) => ({
+            ...item,
+            cartLineId: item.cartLineId ?? makeCartLineId(item.id, item.productVariantId),
+          })),
+        );
+      }
     } catch {
       setCart([]);
     }
@@ -90,6 +130,9 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
             if (cancelled) return;
             await api.post('/basket/items', {
               productId: item.id,
+              productVariantId: item.productVariantId,
+              color: item.selectedColor,
+              size: item.selectedSize,
               quantity: item.quantity,
             });
           }
@@ -107,17 +150,28 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     };
   }, [isAuthenticated]);
 
-  const addToCart = (product: Product): Promise<CartMutationResult> => {
+  const addToCart = (product: AddToCartInput): Promise<CartMutationResult> => {
+    const productVariantId = resolveVariantId(product);
+    const cartLineId = makeCartLineId(product.id, productVariantId);
+
     let previousCart: CartItem[] = [];
     setCart((prev) => {
       previousCart = prev;
-      const existing = prev.find(item => item.id === product.id);
+      const existing = prev.find((item) => item.cartLineId === cartLineId);
       if (existing) {
-        return prev.map(item =>
-          item.id === product.id ? { ...item, quantity: item.quantity + 1 } : item
+        return prev.map((item) =>
+          item.cartLineId === cartLineId ? { ...item, quantity: item.quantity + 1 } : item,
         );
       }
-      return [...prev, { ...product, quantity: 1 }];
+      return [
+        ...prev,
+        {
+          ...product,
+          quantity: 1,
+          productVariantId,
+          cartLineId,
+        },
+      ];
     });
     setIsCartOpen(true);
 
@@ -126,7 +180,13 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
 
     return api
-      .post('/basket/items', { productId: product.id, quantity: 1 })
+      .post('/basket/items', {
+        productId: product.id,
+        productVariantId,
+        color: product.selectedColor,
+        size: product.selectedSize,
+        quantity: 1,
+      })
       .then((res) => {
         setCart(hydrateFromBasketResponse(res.data));
         return { ok: true };
@@ -140,10 +200,10 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       });
   };
 
-  const removeFromCart = (id: string) => {
+  const removeFromCart = (cartLineId: string) => {
     if (isAuthenticated) {
       setCart((prev) => {
-        const item = prev.find((x) => x.id === id);
+        const item = prev.find((x) => x.cartLineId === cartLineId);
         if (item?.basketItemId) {
           api
             .delete(`/basket/items/${item.basketItemId}`)
@@ -152,16 +212,16 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
               // ignore
             });
         }
-        return prev.filter((x) => x.id !== id);
+        return prev.filter((x) => x.cartLineId !== cartLineId);
       });
       return;
     }
-    setCart((prev) => prev.filter((item) => item.id !== id));
+    setCart((prev) => prev.filter((item) => item.cartLineId !== cartLineId));
   };
 
-  const updateCartItemQuantity = (id: string, quantity: number): Promise<CartMutationResult> => {
+  const updateCartItemQuantity = (cartLineId: string, quantity: number): Promise<CartMutationResult> => {
     if (!Number.isFinite(quantity) || quantity < 1) {
-      removeFromCart(id);
+      removeFromCart(cartLineId);
       return Promise.resolve({ ok: true });
     }
 
@@ -170,8 +230,8 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       let basketItemId: string | undefined;
       setCart((prev) => {
         previousCart = prev;
-        basketItemId = prev.find((x) => x.id === id)?.basketItemId;
-        return prev.map((x) => (x.id === id ? { ...x, quantity } : x));
+        basketItemId = prev.find((x) => x.cartLineId === cartLineId)?.basketItemId;
+        return prev.map((x) => (x.cartLineId === cartLineId ? { ...x, quantity } : x));
       });
 
       if (!basketItemId) {
@@ -193,7 +253,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
         });
     }
 
-    setCart((prev) => prev.map((item) => (item.id === id ? { ...item, quantity } : item)));
+    setCart((prev) => prev.map((item) => (item.cartLineId === cartLineId ? { ...item, quantity } : item)));
     return Promise.resolve({ ok: true });
   };
 

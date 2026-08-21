@@ -10,6 +10,7 @@ export interface Review {
 
 /** واریانت محصول: هر ترکیب سایز + رنگ مشخصات و قیمت خودش را دارد */
 export interface ProductVariant {
+  id?: string;
   size?: string;
   color?: string;
   colorCode?: string;
@@ -59,7 +60,10 @@ export interface CartItem extends Product {
   quantity: number;
   selectedSize?: string;
   selectedColor?: string;
+  productVariantId?: string;
   basketItemId?: string;
+  /** شناسه یکتای هر خط سبد خرید (محصول+واریانت)؛ برای تفکیک رنگ‌های مختلف یک محصول */
+  cartLineId: string;
 }
 
 export type ChatRole = 'user' | 'model';

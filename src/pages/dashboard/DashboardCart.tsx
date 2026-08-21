@@ -2,11 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { ShoppingBag, ArrowLeft, Trash2, Loader2 } from 'lucide-react';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { useCart } from '../../contexts/CartContext';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import { DashboardPageHeader } from '../../components/dashboard/DashboardPageHeader';
 import { DashboardCard } from '../../components/dashboard/DashboardCard';
 import { shoppingListService } from '../../services/shoppingList.service';
 import { formatPriceToman } from '../../utils/format';
+import { hasMultipleColors } from '../../utils/variant';
 import type { Product } from '../../types';
 
 interface ListItem {
@@ -19,6 +20,7 @@ interface ListItem {
 export const DashboardCart: React.FC = () => {
   const { t, language } = useLanguage();
   const { lang } = useParams<{ lang: string }>();
+  const navigate = useNavigate();
   const { addToCart, setIsCartOpen } = useCart();
   const [items, setItems] = useState<ListItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -54,6 +56,12 @@ export const DashboardCart: React.FC = () => {
   };
 
   const handleAddToCart = (product: Product) => {
+    // اگر محصول چند رنگ دارد، اینجا نمی‌توان به‌صورت خودکار رنگ درست را حدس زد؛
+    // کاربر باید در صفحه محصول رنگ را انتخاب کند تا سفارش با رنگ درست ثبت شود
+    if (hasMultipleColors(product)) {
+      navigate(`/${lang || language}/product/${product.id}`);
+      return;
+    }
     addToCart(product);
     setIsCartOpen(true);
   };
